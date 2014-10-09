@@ -1,4 +1,6 @@
+#include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <math.h>
 
 #include "alt.h"
@@ -39,4 +41,72 @@ alt_bound(alt_endpt_t *points, int count, bool rounded, alt_bbox_t *bb)
         bb->x1 = ceil(bb->x1);
         bb->y1 = ceil(bb->y1);
     }
+}
+
+/* Create a new array. Return NULL if there is not enough memory. */
+alt_array_t *
+alt_new_array(size_t item_size)
+{
+    alt_array_t *array;
+    array = (alt_array_t *) malloc(sizeof(alt_array_t));
+    if (array == NULL) return NULL;
+    array->bulk = ALT_INIT_BULK;
+    array->count = 0;
+    array->size = item_size;
+    array->items = malloc(array->bulk * array->size);
+    if (array->items == NULL) {
+        free(array);
+        return NULL;
+    }
+    return array;
+}
+
+/* Resize the array to accomodate at least `min_bulk` items. */
+void
+alt_resize_array(alt_array_t *array, unsigned int min_bulk)
+{
+    while (array->bulk > min_bulk)
+        array->bulk >>= 1;
+    while (array->bulk < min_bulk)
+        array->bulk <<= 1;
+    array->items = realloc(array->items, array->bulk * array->size);
+}
+
+/* Add item to the end of `array`. */
+void
+alt_push(alt_array_t *array, void *item)
+{
+    if (array->count == array->bulk)
+        alt_resize_array(array, array->count + 1);
+    memcpy(ALT_AT(array, array->count), item, array->size);
+    array->count++;
+}
+
+/* Remove item from the end of `array`.
+ * The item removed is copied into `item`, if it's not null.
+ */
+void
+alt_pop(alt_array_t *array, void *item)
+{
+    array->count--;
+    if (item != NULL)
+        memcpy(item, ALT_AT(array, array->count), array->size);
+    if (array->count < array->bulk >> 1)
+        alt_resize_array(array, array->count);
+}
+
+/* Sort array according to `comp` (see stdlib's qsort()). */
+void
+alt_sort(alt_array_t *array, int (*comp)(const void *, const void *))
+{
+    qsort(array->items, (size_t) array->count, array->size, comp);
+}
+
+/* Delete array and its content from memory. */
+void
+alt_del_array(alt_array_t **array)
+{
+    free((*array)->items);
+    free(*array);
+    *array = NULL;
 }
