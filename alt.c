@@ -110,3 +110,24 @@ alt_del_array(alt_array_t **array)
     free(*array);
     *array = NULL;
 }
+
+/* Create a new scan window. */
+alt_window_t *
+alt_new_window(int x0, int y0, int x1, int y1)
+{
+    alt_window_t *window;
+    int width, height;
+    window = (alt_window_t *) malloc(sizeof(alt_window_t));
+    if (window == NULL) return NULL;
+    window->x0 = x0; window->y0 = y0;
+    window->x1 = x1; window->y1 = y1;
+    width  = x1-x0+1;
+    height = y1-y0+1;
+    window->hori = alt_new_array(sizeof(alt_cross_t));
+    alt_resize_array(window->hori, height);
+    window->vert = alt_new_array(sizeof(alt_cross_t));
+    alt_resize_array(window->vert, width);
+    window->extr = alt_new_array(sizeof(alt_cross_t));
+    alt_resize_array(window->extr, height);
+    return window;
+}

@@ -29,6 +29,19 @@ typedef struct {
     void *items;        /* actual array contents */
 } alt_array_t;
 
+/* Signed scanline intersection. */
+typedef struct {
+    double dist;    /* distance from scanline origin */
+    int sign;       /* 1 for off-on crossing, -1 for on-off */
+} alt_cross_t;
+
+/* Scan window. */
+typedef struct {
+    int x0, y0, x1, y1;
+    /* Arrays of alt_cross_t. */
+    alt_array_t *hori, *vert, *extr;
+} alt_window_t;
+
 void alt_bbmargin(alt_bbox_t *bb, double mg);
 void alt_bound(alt_endpt_t *points, int count, bool rounded, alt_bbox_t *bb);
 
@@ -38,5 +51,7 @@ void alt_push(alt_array_t *array, void *item);
 void alt_pop(alt_array_t *array, void *item);
 void alt_sort(alt_array_t *array, int (*comp)(const void *, const void *));
 void alt_del_array(alt_array_t **array);
+
+alt_window_t *alt_new_window(int x0, int y0, int x1, int y1);
 
 #endif /* _ALT_H */
