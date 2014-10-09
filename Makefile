@@ -6,7 +6,7 @@ libalt.so: alt.o
 	gcc -shared -o $@ $<
 
 alt.o: alt.c
-	gcc ${CFLAGS} -c -fpic -o $@ $<
+	gcc ${CFLAGS} -c -fpic -o $@ $< -lm
 
 .PHONY: clean
 clean:
