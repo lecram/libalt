@@ -10,4 +10,4 @@ alt.o: alt.c
 
 .PHONY: clean
 clean:
-	rm alt.o
+	rm -f alt.o
