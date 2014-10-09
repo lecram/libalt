@@ -45,12 +45,12 @@ alt_bound(alt_endpt_t *points, int count, bool rounded, alt_bbox_t *bb)
 
 /* Create a new array. Return NULL if there is not enough memory. */
 alt_array_t *
-alt_new_array(size_t item_size)
+alt_new_array(size_t item_size, unsigned int init_bulk)
 {
     alt_array_t *array;
     array = (alt_array_t *) malloc(sizeof(alt_array_t));
     if (array == NULL) return NULL;
-    array->bulk = ALT_INIT_BULK;
+    array->bulk = init_bulk;
     array->count = 0;
     array->size = item_size;
     array->items = malloc(array->bulk * array->size);
@@ -123,11 +123,8 @@ alt_new_window(int x0, int y0, int x1, int y1)
     window->x1 = x1; window->y1 = y1;
     width  = x1-x0+1;
     height = y1-y0+1;
-    window->hori = alt_new_array(sizeof(alt_cross_t));
-    alt_resize_array(window->hori, height);
-    window->vert = alt_new_array(sizeof(alt_cross_t));
-    alt_resize_array(window->vert, width);
-    window->extr = alt_new_array(sizeof(alt_cross_t));
-    alt_resize_array(window->extr, height);
+    window->hori = alt_new_array(sizeof(alt_cross_t), height);
+    window->vert = alt_new_array(sizeof(alt_cross_t), width);
+    window->extr = alt_new_array(sizeof(alt_cross_t), height);
     return window;
 }

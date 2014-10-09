@@ -45,7 +45,7 @@ typedef struct {
 void alt_bbmargin(alt_bbox_t *bb, double mg);
 void alt_bound(alt_endpt_t *points, int count, bool rounded, alt_bbox_t *bb);
 
-alt_array_t *alt_new_array(size_t item_size);
+alt_array_t *alt_new_array(size_t item_size, unsigned int init_bulk);
 void alt_resize_array(alt_array_t *array, unsigned int min_bulk);
 void alt_push(alt_array_t *array, void *item);
 void alt_pop(alt_array_t *array, void *item);
