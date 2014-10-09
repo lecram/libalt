@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <math.h>
 
 #include "alt.h"
@@ -17,7 +18,7 @@ alt_bbmargin(alt_bbox_t *bb, double mg)
  * The result is written to `bb`.
  */
 void
-alt_bound(alt_endpt_t *points, int count, int rounded, alt_bbox_t *bb)
+alt_bound(alt_endpt_t *points, int count, bool rounded, alt_bbox_t *bb)
 {
     int i;
     bb->x0 = bb->x1 = points[0].x;

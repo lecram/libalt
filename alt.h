@@ -18,6 +18,6 @@ typedef struct {
 } alt_ctrpt_t;
 
 void alt_bbmargin(alt_bbox_t *bb, double mg);
-void alt_bound(alt_endpt_t *points, int count, int rounded, alt_bbox_t *bb);
+void alt_bound(alt_endpt_t *points, int count, bool rounded, alt_bbox_t *bb);
 
 #endif /* _ALT_H */
