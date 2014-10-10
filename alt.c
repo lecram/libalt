@@ -277,7 +277,7 @@ alt_windredux(alt_window_t *window)
             alt_push(scanline, &cross);
             winda = windb = 0;
             for (k = 0; k < (int) scans[i][j]->count; k++) {
-                pcross = (alt_cross_t *) ALT_AT(scans[i][j], k);
+                pcross = ALT_CAT(alt_cross_t, scans[i][j], k);
                 windb += pcross->sign;
                 if (!winda || !windb) {
                     if (pcross->dist == cross.dist) {
