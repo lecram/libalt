@@ -54,10 +54,7 @@ alt_new_array(size_t item_size, unsigned int init_bulk)
     array->count = 0;
     array->size = item_size;
     array->items = malloc(array->bulk * array->size);
-    if (array->items == NULL) {
-        free(array);
-        return NULL;
-    }
+    if (array->items == NULL) return NULL;
     return array;
 }
 
@@ -127,12 +124,16 @@ alt_new_window(int x0, int y0, int x1, int y1)
     window->hori = (alt_array_t **) malloc(height * sizeof(alt_array_t *));
     window->vert = (alt_array_t **) malloc(width  * sizeof(alt_array_t *));
     window->extr = (alt_array_t **) malloc(height * sizeof(alt_array_t *));
+    if (window->hori == NULL || window->vert == NULL || window->extr == NULL)
+        return NULL;
     for (i = 0; i < width; i++) {
         window->vert[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
+        if (window->vert[i] == NULL) return NULL;
     }
     for (i = 0; i < height; i++) {
         window->hori[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
         window->extr[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
+        if (window->hori[i] == NULL || window->extr[i] == NULL) return NULL;
     }
     return window;
 }
