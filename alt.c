@@ -256,6 +256,30 @@ void alt_scan(alt_window_t *window, alt_endpt_t *points, int count, double range
     }
 }
 
+/* Sort intersections and reduce them according to the running winding number.
+ * Only crossings that goes to or come from a zero winding number are kept.
+ */
+void alt_windredux(alt_window_t *window)
+{
+    alt_array_t **scans[3];
+    int count[3];
+    int width, height;
+    int i, j;
+    width  = window->x1 - window->x0 + 1;
+    height = window->y1 - window->y0 + 1;
+    scans[0] = window->vert;
+    scans[1] = window->hori;
+    scans[2] = window->extr;
+    count[0] = width;
+    count[1] = count[2] = height;
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < count[i]; j++) {
+            alt_sort(scans[i][j], alt_comp_cross);
+        }
+    }
+    /* TODO: reduce crossings. */
+}
+
 /* Delete `window` and its content from memory. */
 void alt_del_window(alt_window_t **window)
 {
