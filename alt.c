@@ -108,6 +108,15 @@ alt_del_array(alt_array_t **array)
     *array = NULL;
 }
 
+/* Intersection comparison for qsort()-like interfaces. */
+int
+alt_comp_cross(const void *a, const void *b)
+{
+    const alt_cross_t *arg1 = a;
+    const alt_cross_t *arg2 = b;
+    return arg1->dist - arg2->dist;
+}
+
 /* Create a new scan window. */
 alt_window_t *
 alt_new_window(int x0, int y0, int x1, int y1)

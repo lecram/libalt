@@ -52,6 +52,8 @@ void alt_pop(alt_array_t *array, void *item);
 void alt_sort(alt_array_t *array, int (*comp)(const void *, const void *));
 void alt_del_array(alt_array_t **array);
 
+int alt_comp_cross(const void *a, const void *b);
+
 alt_window_t *alt_new_window(int x0, int y0, int x1, int y1);
 void alt_scan(alt_window_t *window, alt_endpt_t *points, int count, double range);
 void alt_del_window(alt_window_t **window);
