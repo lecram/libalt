@@ -122,7 +122,6 @@ alt_window_t *
 alt_new_window(int x0, int y0, int x1, int y1)
 {
     alt_window_t *window;
-    alt_cross_t cross;
     int width, height;
     int i;
     window = (alt_window_t *) malloc(sizeof(alt_window_t));
@@ -136,19 +135,14 @@ alt_new_window(int x0, int y0, int x1, int y1)
     window->extr = (alt_array_t **) malloc(height * sizeof(alt_array_t *));
     if (window->hori == NULL || window->vert == NULL || window->extr == NULL)
         return NULL;
-    /* First item (sentinel) for all scanlines. */
-    cross.dist = -HUGE_VAL;
     for (i = 0; i < width; i++) {
         window->vert[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
         if (window->vert[i] == NULL) return NULL;
-        alt_push(window->vert[i], &cross);
     }
     for (i = 0; i < height; i++) {
         window->hori[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
         window->extr[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
         if (window->hori[i] == NULL || window->extr[i] == NULL) return NULL;
-        alt_push(window->hori[i], &cross);
-        alt_push(window->extr[i], &cross);
     }
     return window;
 }
