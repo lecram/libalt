@@ -318,3 +318,18 @@ void alt_del_window(alt_window_t **window)
     free(*window);
     *window = NULL;
 }
+
+/* Return the minimum distance from `x` to its closest point on `scanline`.
+ * Note that x here is a 1D coordinate that follows the scanline's direction.
+ * This function is only used as a helper to alt_dist().
+ */
+double alt_scanrange(alt_array_t *scanline, double x)
+{
+    int i = 1;
+    while (ALT_CAT(alt_cross_t, scanline, i)->dist <= x)
+        i++;
+    return ALT_MIN(
+        ALT_CAT(alt_cross_t, scanline, i)->dist - x,
+        x - ALT_CAT(alt_cross_t, scanline, i-1)->dist
+    );
+}

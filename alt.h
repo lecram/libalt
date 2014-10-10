@@ -21,7 +21,10 @@ typedef struct {
 
 #define ALT_INIT_BULK 7
 
+#define ALT_MIN(A, B) ((A) < (B) ? (A) : (B))
+#define ALT_MAX(A, B) ((A) > (B) ? (A) : (B))
 #define ALT_AT(A, I) ((A)->items + (I) * (A)->size)
+#define ALT_CAT(T, A, I) ((T *) ALT_AT((A), (I)))
 
 /* Generic dynamic array. */
 typedef struct {
@@ -60,5 +63,7 @@ alt_window_t *alt_new_window(int x0, int y0, int x1, int y1);
 void alt_scan(alt_window_t *window, alt_endpt_t *points, int count, double range);
 void alt_windredux(alt_window_t *window);
 void alt_del_window(alt_window_t **window);
+
+double alt_scanrange(alt_array_t *scanline, double x);
 
 #endif /* _ALT_H */
