@@ -21,7 +21,7 @@ typedef struct {
 
 #define ALT_INIT_BULK 7
 
-#define ALT_AT(A, I) (A)->items + (I) * (A)->size
+#define ALT_AT(A, I) ((A)->items + (I) * (A)->size)
 
 /* Generic dynamic array. */
 typedef struct {
