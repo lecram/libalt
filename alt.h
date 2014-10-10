@@ -65,5 +65,6 @@ void alt_windredux(alt_window_t *window);
 void alt_del_window(alt_window_t **window);
 
 double alt_scanrange(alt_array_t *scanline, double x);
+double alt_dist(alt_window_t *window, double x, double y, double r);
 
 #endif /* _ALT_H */

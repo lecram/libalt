@@ -337,3 +337,44 @@ alt_scanrange(alt_array_t *scanline, double x)
         x - ALT_CAT(alt_cross_t, scanline, i-1)->dist
     );
 }
+
+/* Return the minimum distance between (x, y) and the path scanned into
+ * `window`. If that path doesn't intersect the disk of radius `r`
+ * centered at (x, y), then return `r`.
+ * This function implements the L1L2 algorithm.
+ */
+double
+alt_dist(alt_window_t *window, double x, double y, double r)
+{
+    double mind, mag;
+    double j, d, d1, d2;
+    int width, height;
+    int i, xi, yi;
+    width  = window->x1 - window->x0 + 1;
+    height = window->y1 - window->y0 + 1;
+    xi = x - window->x0 + 1;
+    yi = y - window->y0 + 1;
+    i = 0;
+    mind = r*r;
+    mag = r/sqrt(2.0);
+    do {
+        d1 = i*i;
+        j = HUGE_VAL;
+        if (xi-i >= 0 && xi-i < width)
+            j = ALT_MIN(j, alt_scanrange(window->vert[xi-i], y));
+        if (xi+i >= 0 && xi+i < width)
+            j = ALT_MIN(j, alt_scanrange(window->vert[xi+i], y));
+        if (yi-i >= 0 && yi-i < height)
+            j = ALT_MIN(j, alt_scanrange(window->hori[yi-i], x));
+        if (yi+i >= 0 && yi+i < height)
+            j = ALT_MIN(j, alt_scanrange(window->hori[yi+i], x));
+        d2 = j*j;
+        d = d1 + d2;
+        if (d < mind) {
+            mag = sqrt(d/2);
+            mind = d;
+        }
+        i++;
+    } while (i > (int) mag);
+    return mag * sqrt(2);
+}
