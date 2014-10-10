@@ -240,3 +240,23 @@ void alt_scan(alt_window_t *window, alt_endpt_t *points, int count, double range
         }
     }
 }
+
+void alt_del_window(alt_window_t **window)
+{
+    int width, height;
+    int i;
+    width  = (*window)->x1 - (*window)->x0 + 1;
+    height = (*window)->y1 - (*window)->y0 + 1;
+    for (i = 0; i < width; i++) {
+        alt_del_array(&(*window)->vert[i]);
+    }
+    for (i = 0; i < height; i++) {
+        alt_del_array(&(*window)->hori[i]);
+        alt_del_array(&(*window)->extr[i]);
+    }
+    free((*window)->hori);
+    free((*window)->vert);
+    free((*window)->extr);
+    free(*window);
+    *window = NULL;
+}
