@@ -117,14 +117,22 @@ alt_new_window(int x0, int y0, int x1, int y1)
 {
     alt_window_t *window;
     int width, height;
+    int i;
     window = (alt_window_t *) malloc(sizeof(alt_window_t));
     if (window == NULL) return NULL;
     window->x0 = x0; window->y0 = y0;
     window->x1 = x1; window->y1 = y1;
     width  = x1-x0+1;
     height = y1-y0+1;
-    window->hori = alt_new_array(sizeof(alt_cross_t), height);
-    window->vert = alt_new_array(sizeof(alt_cross_t), width);
-    window->extr = alt_new_array(sizeof(alt_cross_t), height);
+    window->hori = (alt_array_t **) malloc(height * sizeof(alt_array_t *));
+    window->vert = (alt_array_t **) malloc(width  * sizeof(alt_array_t *));
+    window->extr = (alt_array_t **) malloc(height * sizeof(alt_array_t *));
+    for (i = 0; i < width; i++) {
+        window->vert[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
+    }
+    for (i = 0; i < height; i++) {
+        window->hori[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
+        window->extr[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
+    }
     return window;
 }

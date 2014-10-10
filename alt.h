@@ -38,8 +38,8 @@ typedef struct {
 /* Scan window. */
 typedef struct {
     int x0, y0, x1, y1;
-    /* Arrays of alt_cross_t. */
-    alt_array_t *hori, *vert, *extr;
+    /* Arrays of arrays of alt_cross_t. */
+    alt_array_t **hori, **vert, **extr;
 } alt_window_t;
 
 void alt_bbmargin(alt_bbox_t *bb, double mg);
