@@ -1,6 +1,8 @@
 #ifndef _ALT_H
 #define _ALT_H
 
+#include <stdbool.h>
+
 /* Bounding box. */
 typedef struct {
     double x0, y0, x1, y1;
