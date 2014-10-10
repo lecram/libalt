@@ -149,7 +149,8 @@ alt_new_window(int x0, int y0, int x1, int y1)
 /* Scan `count` points at `points` and add intersections to `window`.
  * `range` is the line width for the extra scan.
  */
-void alt_scan(alt_window_t *window, alt_endpt_t *points, int count, double range)
+void
+alt_scan(alt_window_t *window, alt_endpt_t *points, int count, double range)
 {
     alt_endpt_t pa, pb;
     alt_array_t *scanline;
@@ -252,7 +253,8 @@ void alt_scan(alt_window_t *window, alt_endpt_t *points, int count, double range
 /* Sort intersections and reduce them according to the running winding number.
  * Only crossings that goes to or come from a zero winding number are kept.
  */
-void alt_windredux(alt_window_t *window)
+void
+alt_windredux(alt_window_t *window)
 {
     alt_array_t **scans[3], *scanline;
     alt_cross_t cross, *pcross;
@@ -299,7 +301,8 @@ void alt_windredux(alt_window_t *window)
 }
 
 /* Delete `window` and its content from memory. */
-void alt_del_window(alt_window_t **window)
+void
+alt_del_window(alt_window_t **window)
 {
     int width, height;
     int i;
@@ -323,7 +326,8 @@ void alt_del_window(alt_window_t **window)
  * Note that x here is a 1D coordinate that follows the scanline's direction.
  * This function is only used as a helper to alt_dist().
  */
-double alt_scanrange(alt_array_t *scanline, double x)
+double
+alt_scanrange(alt_array_t *scanline, double x)
 {
     int i = 1;
     while (ALT_CAT(alt_cross_t, scanline, i)->dist <= x)
