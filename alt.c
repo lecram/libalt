@@ -255,10 +255,12 @@ void alt_scan(alt_window_t *window, alt_endpt_t *points, int count, double range
  */
 void alt_windredux(alt_window_t *window)
 {
-    alt_array_t **scans[3];
+    alt_array_t **scans[3], *scanline;
+    alt_cross_t cross, *pcross;
     int count[3];
     int width, height;
-    int i, j;
+    int winda, windb;
+    int i, j, k;
     width  = window->x1 - window->x0 + 1;
     height = window->y1 - window->y0 + 1;
     scans[0] = window->vert;
@@ -269,9 +271,32 @@ void alt_windredux(alt_window_t *window)
     for (i = 0; i < 3; i++) {
         for (j = 0; j < count[i]; j++) {
             alt_sort(scans[i][j], alt_comp_cross);
+            scanline = alt_new_array(sizeof(alt_cross_t), scans[i][j]->count);
+            cross.dist = -HUGE_VAL;
+            alt_push(scanline, &cross);
+            winda = windb = 0;
+            for (k = 0; k < (int) scans[i][j]->count; k++) {
+                pcross = (alt_cross_t *) ALT_AT(scans[i][j], k);
+                windb += pcross->sign;
+                if (!winda || !windb) {
+                    if (pcross->dist == cross.dist) {
+                        /* Duplicate crossings cancel each other. */
+                        alt_pop(scanline, NULL);
+                    }
+                    else {
+                        cross.dist = pcross->dist;
+                        alt_push(scanline, &cross);
+                    }
+                }
+                winda = windb;
+            }
+            cross.dist = HUGE_VAL;
+            alt_push(scanline, &cross);
+            alt_resize_array(scanline, scanline->count);
+            alt_del_array(&scans[i][j]);
+            scans[i][j] = scanline;
         }
     }
-    /* TODO: reduce crossings. */
 }
 
 /* Delete `window` and its content from memory. */
