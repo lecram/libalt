@@ -99,7 +99,7 @@ alt_sort(alt_array_t *array, int (*comp)(const void *, const void *))
     qsort(array->items, (size_t) array->count, array->size, comp);
 }
 
-/* Delete array and its content from memory. */
+/* Delete `array` and its content from memory. */
 void
 alt_del_array(alt_array_t **array)
 {
@@ -241,6 +241,7 @@ void alt_scan(alt_window_t *window, alt_endpt_t *points, int count, double range
     }
 }
 
+/* Delete `window` and its content from memory. */
 void alt_del_window(alt_window_t **window)
 {
     int width, height;
