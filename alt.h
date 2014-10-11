@@ -69,6 +69,7 @@ void alt_unpack_color(uint32_t color, uint8_t *r, uint8_t *g, uint8_t *b, uint8_
 alt_image_t *alt_new_image(int width, int height);
 void alt_clear(alt_image_t *image, uint32_t color);
 void alt_blend(alt_image_t *image, int x, int y, uint32_t color);
+void alt_save_pam(alt_image_t *image, char *fname);
 void alt_del_image(alt_image_t **image);
 
 alt_array_t *alt_new_array(size_t item_size, unsigned int init_bulk);

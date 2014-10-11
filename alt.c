@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdio.h>
 
 #include "alt.h"
 
@@ -145,6 +146,23 @@ alt_blend(alt_image_t *image, int x, int y, uint32_t color)
         a2 = lround(da2*255);
         ALT_PIX(image, x, y) = alt_pack_color(r2, g2, b2, a2);
     }
+}
+
+/* Save image as PAM file. */
+void
+alt_save_pam(alt_image_t *image, char *fname)
+{
+    FILE *pam = fopen(fname, "w");
+    if (pam == NULL) return;
+    fprintf(pam, "P7\n");
+    fprintf(pam, "WIDTH %d\n", image->width);
+    fprintf(pam, "HEIGHT %d\n", image->height);
+    fprintf(pam, "DEPTH 4\n");
+    fprintf(pam, "MAXVAL 255\n");
+    fprintf(pam, "TUPLTYPE RGB_ALPHA\n");
+    fprintf(pam, "ENDHDR\n");
+    fwrite(image->data, sizeof(uint32_t), image->width*image->height, pam);
+    fclose(pam);
 }
 
 /* Delete `image` and its content from memory. */
