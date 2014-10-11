@@ -88,4 +88,7 @@ void alt_del_window(alt_window_t **window);
 double alt_scanrange(alt_array_t *scanline, double x);
 double alt_dist(alt_window_t *window, double x, double y, double r);
 
+void alt_draw(alt_image_t *image, alt_window_t *window,
+              uint32_t fill, uint32_t strk, double thick);
+
 #endif /* _ALT_H */
