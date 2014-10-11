@@ -67,7 +67,7 @@ void alt_bound(alt_endpt_t *points, int count, alt_bbox_t *bb);
 uint32_t alt_pack_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 void alt_unpack_color(uint32_t color, uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *a);
 alt_image_t *alt_new_image(int width, int height);
-void alt_image_fill(alt_image_t *image, uint32_t color);
+void alt_clear(alt_image_t *image, uint32_t color);
 void alt_blend(alt_image_t *image, int x, int y, uint32_t color);
 void alt_del_image(alt_image_t **image);
 

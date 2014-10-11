@@ -113,9 +113,9 @@ alt_new_image(int width, int height)
     return image;
 }
 
-/* Paint the entire image with `color`. */
+/* Fill the entire image with `color`. */
 void
-alt_image_fill(alt_image_t *image, uint32_t color)
+alt_clear(alt_image_t *image, uint32_t color)
 {
     int i;
     for (i = 0; i < image->width*image->height; i++)
