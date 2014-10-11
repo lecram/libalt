@@ -3,6 +3,9 @@
 
 #include <stdbool.h>
 
+#define ALT_MIN(A, B) ((A) < (B) ? (A) : (B))
+#define ALT_MAX(A, B) ((A) > (B) ? (A) : (B))
+
 /* Bounding box. */
 typedef struct {
     double x0, y0, x1, y1;
@@ -21,8 +24,6 @@ typedef struct {
 
 #define ALT_INIT_BULK 7
 
-#define ALT_MIN(A, B) ((A) < (B) ? (A) : (B))
-#define ALT_MAX(A, B) ((A) > (B) ? (A) : (B))
 #define ALT_AT(A, I) ((A)->items + (I) * (A)->size)
 #define ALT_CAT(T, A, I) ((T *) ALT_AT((A), (I)))
 
