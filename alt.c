@@ -61,6 +61,7 @@ alt_new_array(size_t item_size, unsigned int init_bulk)
 void
 alt_resize_array(alt_array_t *array, unsigned int min_bulk)
 {
+    min_bulk = min_bulk || 2;
     while (array->bulk > min_bulk)
         array->bulk >>= 1;
     while (array->bulk < min_bulk)
