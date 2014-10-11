@@ -1,6 +1,8 @@
 #ifndef _ALT_H
 #define _ALT_H
 
+#include <stdbool.h>
+
 /* Bounding box. */
 typedef struct {
     double x0, y0, x1, y1;
@@ -45,6 +47,10 @@ typedef struct {
     alt_array_t **hori, **vert, **extr;
 } alt_window_t;
 
+bool alt_bbisnull(alt_bbox_t *bb);
+void alt_bbsetnull(alt_bbox_t *bb);
+void alt_bbinter(alt_bbox_t *bb1, alt_bbox_t *bb2);
+void alt_bbunion(alt_bbox_t *bb1, alt_bbox_t *bb2);
 void alt_bbmargin(alt_bbox_t *bb, double mg);
 void alt_bound(alt_endpt_t *points, int count, alt_bbox_t *bb);
 

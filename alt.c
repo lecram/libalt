@@ -4,6 +4,53 @@
 
 #include "alt.h"
 
+bool
+alt_bbisnull(alt_bbox_t *bb)
+{
+    return bb->x0 >= bb->x1 || bb->y0 >= bb->y1;
+}
+
+void
+alt_bbsetnull(alt_bbox_t *bb)
+{
+    bb->x0 = bb->y0 = 0;
+    bb->x1 = bb->y1 = -1;
+}
+
+/* Compute the intersection of `bb1` and `bb2` and write it to `bb1`. */
+void
+alt_bbinter(alt_bbox_t *bb1, alt_bbox_t *bb2)
+{
+    if (alt_bbisnull(bb1)) return;
+    if (alt_bbisnull(bb2)) {
+        alt_bbsetnull(bb1);
+    }
+    else {
+        bb1->x0 = ALT_MAX(bb1->x0, bb2->x0);
+        bb1->y0 = ALT_MAX(bb1->y0, bb2->y0);
+        bb1->x1 = ALT_MIN(bb1->x1, bb2->x1);
+        bb1->y1 = ALT_MIN(bb1->y1, bb2->y1);
+    }
+}
+
+/* Compute the union of `bb1` and `bb2` and write it to `bb1`. */
+void
+alt_bbunion(alt_bbox_t *bb1, alt_bbox_t *bb2)
+{
+    if (alt_bbisnull(bb1)) {
+        bb1->x0 = bb2->x0;
+        bb1->y0 = bb2->y0;
+        bb1->x1 = bb2->x1;
+        bb1->y1 = bb2->y1;
+    }
+    else if (!alt_bbisnull(bb2)) {
+        bb1->x0 = ALT_MIN(bb1->x0, bb2->x0);
+        bb1->y0 = ALT_MIN(bb1->y0, bb2->y0);
+        bb1->x1 = ALT_MAX(bb1->x1, bb2->x1);
+        bb1->y1 = ALT_MAX(bb1->y1, bb2->y1);
+    }
+}
+
 /* Add a margin to the bounding box at `bb`. */
 void
 alt_bbmargin(alt_bbox_t *bb, double mg)
