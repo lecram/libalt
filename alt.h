@@ -1,6 +1,7 @@
 #ifndef _ALT_H
 #define _ALT_H
 
+#include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
 
