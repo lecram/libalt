@@ -15,11 +15,10 @@ alt_bbmargin(alt_bbox_t *bb, double mg)
 }
 
 /* Compute the bounding box of `count` points at `points`.
- * If `rounded` is nonzero, the result is fitted to the integer lattice.
  * The result is written to `bb`.
  */
 void
-alt_bound(alt_endpt_t *points, int count, bool rounded, alt_bbox_t *bb)
+alt_bound(alt_endpt_t *points, int count, alt_bbox_t *bb)
 {
     int i;
     bb->x0 = bb->x1 = points[0].x;
@@ -33,12 +32,6 @@ alt_bound(alt_endpt_t *points, int count, bool rounded, alt_bbox_t *bb)
             bb->y0 = points[i].y;
         else if (points[i].y > bb->y1)
             bb->y1 = points[i].y;
-    }
-    if (rounded) {
-        bb->x0 = floor(bb->x0);
-        bb->y0 = floor(bb->y0);
-        bb->x1 = ceil(bb->x1);
-        bb->y1 = ceil(bb->y1);
     }
 }
 
@@ -125,10 +118,10 @@ alt_new_window(alt_bbox_t *bb)
     int i;
     window = (alt_window_t *) malloc(sizeof(alt_window_t));
     if (window == NULL) return NULL;
-    window->x0 = (int) bb->x0;
-    window->y0 = (int) bb->y0;
-    window->width  = (int) (bb->x1 - bb->x0 + 1);
-    window->height = (int) (bb->y1 - bb->y0 + 1);
+    window->x0 = (int) floor(bb->x0);
+    window->y0 = (int) floor(bb->y0);
+    window->width  = (int) (ceil(bb->x1) - floor(bb->x0) + 1);
+    window->height = (int) (ceil(bb->y1) - floor(bb->y0) + 1);
     window->hori = (alt_array_t **) malloc(window->height * sizeof(alt_array_t *));
     window->vert = (alt_array_t **) malloc(window->width  * sizeof(alt_array_t *));
     window->extr = (alt_array_t **) malloc(window->height * sizeof(alt_array_t *));
