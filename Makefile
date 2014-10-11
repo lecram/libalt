@@ -1,4 +1,10 @@
-CFLAGS+= -Wall -Wextra -Werror -std=c99 -O2
+CFLAGS = -Wall -Wextra -Werror -std=c99
+DEBUG ?= 0
+ifeq ($(DEBUG), 1)
+    CFLAGS += -O0 -g
+else
+    CFLAGS += -O2
+endif
 
 all: libalt.so
 
