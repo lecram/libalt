@@ -2,6 +2,7 @@
 #define _ALT_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define ALT_MIN(A, B) ((A) < (B) ? (A) : (B))
 #define ALT_MAX(A, B) ((A) > (B) ? (A) : (B))
@@ -21,6 +22,12 @@ typedef struct {
     double x, y;
     int on;
 } alt_ctrpt_t;
+
+/* Raw 32-bit RGBA image. */
+typedef struct {
+    int width, height;  /* image size in pixels */
+    uint32_t *data;     /* width*height pixels in format 0xRRGGBBAA */
+} alt_image_t;
 
 #define ALT_INIT_BULK 7
 
@@ -54,6 +61,9 @@ void alt_bbinter(alt_bbox_t *bb1, alt_bbox_t *bb2);
 void alt_bbunion(alt_bbox_t *bb1, alt_bbox_t *bb2);
 void alt_bbmargin(alt_bbox_t *bb, double mg);
 void alt_bound(alt_endpt_t *points, int count, alt_bbox_t *bb);
+
+alt_image_t *alt_new_image(int width, int height);
+void alt_del_image(alt_image_t **image);
 
 alt_array_t *alt_new_array(size_t item_size, unsigned int init_bulk);
 void alt_resize_array(alt_array_t *array, unsigned int min_bulk);

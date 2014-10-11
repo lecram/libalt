@@ -82,6 +82,27 @@ alt_bound(alt_endpt_t *points, int count, alt_bbox_t *bb)
     }
 }
 
+alt_image_t *
+alt_new_image(int width, int height)
+{
+    alt_image_t *image;
+    image = (alt_image_t *) malloc(sizeof(alt_image_t));
+    if (image == NULL) return NULL;
+    image->width  = width;
+    image->height = height;
+    image->data = (uint32_t *) calloc(width*height, sizeof(uint32_t));
+    if (image->data == NULL) return NULL;
+    return image;
+}
+
+void
+alt_del_image(alt_image_t **image)
+{
+    free((*image)->data);
+    free(*image);
+    *image = NULL;
+}
+
 /* Create a new array. Return NULL if there is not enough memory. */
 alt_array_t *
 alt_new_array(size_t item_size, unsigned int init_bulk)
