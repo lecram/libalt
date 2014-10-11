@@ -109,9 +109,33 @@ alt_new_image(int width, int height)
     if (image == NULL) return NULL;
     image->width  = width;
     image->height = height;
-    image->data = (uint32_t *) calloc(width*height, sizeof(uint32_t));
+    image->data = (uint8_t *) calloc(4*width*height, sizeof(uint32_t));
     if (image->data == NULL) return NULL;
     return image;
+}
+
+void
+alt_get_pixel(alt_image_t *image, int x, int y,
+              uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *a)
+{
+    int i;
+    i = 4*(y*image->width+x);
+    *r = image->data[i];
+    *g = image->data[i+1];
+    *b = image->data[i+2];
+    *a = image->data[i+3];
+}
+
+void
+alt_set_pixel(alt_image_t *image, int x, int y,
+              uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+    int i;
+    i = 4*(y*image->width+x);
+    image->data[i]   = r;
+    image->data[i+1] = g;
+    image->data[i+2] = b;
+    image->data[i+3] = a;
 }
 
 /* Fill the entire image with `color`. */
@@ -119,8 +143,14 @@ void
 alt_clear(alt_image_t *image, uint32_t color)
 {
     int i;
-    for (i = 0; i < image->width*image->height; i++)
-        image->data[i] = color;
+    uint8_t r, g, b, a;
+    alt_unpack_color(color, &r, &g, &b, &a);
+    for (i = 0; i < 4*image->width*image->height; i += 4) {
+        image->data[i]   = r;
+        image->data[i+1] = g;
+        image->data[i+2] = b;
+        image->data[i+3] = a;
+    }
 }
 
 /* Alpha-blend pixel at (x, y) with `color`. */
@@ -131,20 +161,20 @@ alt_blend(alt_image_t *image, int x, int y, uint32_t color)
     uint8_t r1, g1, b1, a1; /* foreground */
     uint8_t r2, g2, b2, a2; /* blended */
     double da0, da1, da2, o;
-    alt_unpack_color(ALT_PIX(image, x, y), &r0, &g0, &b0, &a0);
+    alt_get_pixel(image, x, y, &r0, &g0, &b0, &a0);
     alt_unpack_color(color, &r1, &g1, &b1, &a1);
     da0 = ((double) a0) / 255;
     da1 = ((double) a1) / 255;
     o = da0*(1-da1);
     da2 = da1 + o;
     if (da2 == 0)
-        ALT_PIX(image, x, y) = 0;
+        alt_set_pixel(image, x, y, 0, 0, 0, 0);
     else {
         r2 = lround((r1*da1 + r0*o) / da2);
         g2 = lround((g1*da1 + g0*o) / da2);
         b2 = lround((b1*da1 + b0*o) / da2);
         a2 = lround(da2*255);
-        ALT_PIX(image, x, y) = alt_pack_color(r2, g2, b2, a2);
+        alt_set_pixel(image, x, y, r2, g2, b2, a2);
     }
 }
 
