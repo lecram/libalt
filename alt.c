@@ -477,7 +477,7 @@ alt_dist(alt_window_t *window, double x, double y, double r)
             mind = d;
         }
         i++;
-    } while (i > (int) mag);
+    } while (i <= (int) mag);
     return mag * sqrt(2);
 }
 
