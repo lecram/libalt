@@ -82,6 +82,21 @@ alt_bound(alt_endpt_t *points, int count, alt_bbox_t *bb)
     }
 }
 
+/* Pack color components into 32-bit value. */
+uint32_t
+alt_pack_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+    return (r << 24) + (g << 16) + (b << 8) + a;
+}
+
+/* Unpack color components from 32-bit value. */
+void
+alt_unpack_color(uint32_t color, uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *a)
+{
+    uint8_t *p = (uint8_t *) &color;
+    *r = p[0]; *g = p[1]; *b = p[2]; *a = p[3];
+}
+
 /* Create a new image. Return NULL if there is not enough memory. */
 alt_image_t *
 alt_new_image(int width, int height)
@@ -103,6 +118,31 @@ alt_image_fill(alt_image_t *image, uint32_t color)
     int i;
     for (i = 0; i < image->width*image->height; i++)
         image->data[i] = color;
+}
+
+/* Alpha-blend pixel at (x, y) with `color`. */
+void
+alt_blend(alt_image_t *image, int x, int y, uint32_t color)
+{
+    uint8_t r0, g0, b0, a0; /* background */
+    uint8_t r1, g1, b1, a1; /* foreground */
+    uint8_t r2, g2, b2, a2; /* blended */
+    double da0, da1, da2, o;
+    alt_unpack_color(ALT_PIX(image, x, y), &r0, &g0, &b0, &a0);
+    alt_unpack_color(color, &r1, &g1, &b1, &a1);
+    da0 = ((double) a0) / 255;
+    da1 = ((double) a1) / 255;
+    o = da0*(1-da1);
+    da2 = da1 + o;
+    if (da2 == 0)
+        ALT_PIX(image, x, y) = 0;
+    else {
+        r2 = lround((r1*da1 + r0*o) / da2);
+        g2 = lround((g1*da1 + g0*o) / da2);
+        b2 = lround((b1*da1 + b0*o) / da2);
+        a2 = lround(da2*255);
+        ALT_PIX(image, x, y) = alt_pack_color(r2, g2, b2, a2);
+    }
 }
 
 /* Delete `image` and its content from memory. */
