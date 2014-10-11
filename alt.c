@@ -501,8 +501,8 @@ alt_dist(alt_window_t *window, double x, double y, double r)
     double mind, mag;
     double j, d, d1, d2;
     int i, xi, yi;
-    xi = x - window->x0 + 1;
-    yi = y - window->y0 + 1;
+    xi = x - window->x0;
+    yi = y - window->y0;
     i = 0;
     mind = r*r;
     mag = r/sqrt(2.0);
