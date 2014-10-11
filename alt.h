@@ -42,7 +42,7 @@ typedef struct {
 
 /* Scan window. */
 typedef struct {
-    int x0, y0, x1, y1;
+    int x0, y0, width, height;
     /* Arrays of arrays of alt_cross_t. */
     alt_array_t **hori, **vert, **extr;
 } alt_window_t;
