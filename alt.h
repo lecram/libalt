@@ -23,6 +23,8 @@ typedef struct {
     int on;
 } alt_ctrpt_t;
 
+#define ALT_PIX(I, X, Y) ((I)->data[(Y)*(I)->width+(X)])
+
 /* Raw 32-bit RGBA image. */
 typedef struct {
     int width, height;  /* image size in pixels */
@@ -63,6 +65,7 @@ void alt_bbmargin(alt_bbox_t *bb, double mg);
 void alt_bound(alt_endpt_t *points, int count, alt_bbox_t *bb);
 
 alt_image_t *alt_new_image(int width, int height);
+void alt_image_fill(alt_image_t *image, uint32_t color);
 void alt_del_image(alt_image_t **image);
 
 alt_array_t *alt_new_array(size_t item_size, unsigned int init_bulk);
