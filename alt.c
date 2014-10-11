@@ -118,17 +118,17 @@ alt_comp_cross(const void *a, const void *b)
 
 /* Create a new scan window. */
 alt_window_t *
-alt_new_window(int x0, int y0, int x1, int y1)
+alt_new_window(alt_bbox_t *bb)
 {
     alt_window_t *window;
     int width, height;
     int i;
     window = (alt_window_t *) malloc(sizeof(alt_window_t));
     if (window == NULL) return NULL;
-    window->x0 = x0; window->y0 = y0;
-    window->x1 = x1; window->y1 = y1;
-    width  = x1-x0+1;
-    height = y1-y0+1;
+    window->x0 = (int) bb->x0; window->y0 = (int) bb->y0;
+    window->x1 = (int) bb->x1; window->y1 = (int) bb->y1;
+    width  = (int) (bb->x1 - bb->x0 + 1);
+    height = (int) (bb->y1 - bb->y0 + 1);
     window->hori = (alt_array_t **) malloc(height * sizeof(alt_array_t *));
     window->vert = (alt_array_t **) malloc(width  * sizeof(alt_array_t *));
     window->extr = (alt_array_t **) malloc(height * sizeof(alt_array_t *));
