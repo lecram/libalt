@@ -49,7 +49,7 @@ alt_new_array(size_t item_size, unsigned int init_bulk)
     alt_array_t *array;
     array = (alt_array_t *) malloc(sizeof(alt_array_t));
     if (array == NULL) return NULL;
-    array->bulk = init_bulk;
+    array->bulk = init_bulk || ALT_INIT_BULK;
     array->count = 0;
     array->size = item_size;
     array->items = malloc(array->bulk * array->size);
