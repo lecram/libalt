@@ -153,26 +153,25 @@ alt_clear(alt_image_t *image, uint32_t color)
     }
 }
 
-/* Alpha-blend pixel at (x, y) with `color`. */
+/* Alpha-blend pixel at (x, y) with (r, g, b, a). */
 void
-alt_blend(alt_image_t *image, int x, int y, uint32_t color)
+alt_blend(alt_image_t *image, int x, int y,
+          uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
     uint8_t r0, g0, b0, a0; /* background */
-    uint8_t r1, g1, b1, a1; /* foreground */
     uint8_t r2, g2, b2, a2; /* blended */
     double da0, da1, da2, o;
     alt_get_pixel(image, x, y, &r0, &g0, &b0, &a0);
-    alt_unpack_color(color, &r1, &g1, &b1, &a1);
     da0 = ((double) a0) / 255;
-    da1 = ((double) a1) / 255;
+    da1 = ((double) a) / 255;
     o = da0*(1-da1);
     da2 = da1 + o;
     if (da2 == 0)
         alt_set_pixel(image, x, y, 0, 0, 0, 0);
     else {
-        r2 = lround((r1*da1 + r0*o) / da2);
-        g2 = lround((g1*da1 + g0*o) / da2);
-        b2 = lround((b1*da1 + b0*o) / da2);
+        r2 = lround((r*da1 + r0*o) / da2);
+        g2 = lround((g*da1 + g0*o) / da2);
+        b2 = lround((b*da1 + b0*o) / da2);
         a2 = lround(da2*255);
         alt_set_pixel(image, x, y, r2, g2, b2, a2);
     }
@@ -536,8 +535,12 @@ alt_draw(alt_image_t *image, alt_window_t *window,
     alt_array_t *esl, *hsl;
     alt_cross_t *ecross, *hcross;
     bool border, inside;
-    double hlwp, d, m;
+    double hlwp, d, m, aa;
+    uint8_t fr, fg, fb, fa;
+    uint8_t sr, sg, sb, sa;
     int x, y, i;
+    alt_unpack_color(fill, &fr, &fg, &fb, &fa);
+    alt_unpack_color(strk, &sr, &sg, &sb, &sa);
     hlwp = thick/2 + 0.5;
     i = 0;
     for (y = window->y0; y < window->y0 + window->height; y++, i++) {
@@ -560,17 +563,17 @@ alt_draw(alt_image_t *image, alt_window_t *window,
                 d = alt_dist(window, x, y, hlwp);
                 m = fabs(d);
                 if (inside) {
-                    //~ aa = ALT_MIN(d, 1);
-                    alt_blend(image, x, y, fill);
+                    aa = ALT_MIN(d, 1);
+                    alt_blend(image, x, y, fr, fg, fb, lround(aa*fa));
                 }
                 if (m < hlwp) {
-                    //~ aa = hlwp - m;
-                    //~ aa = ALT_MIN(aa, 1);
-                    alt_blend(image, x, y, strk);
+                    aa = hlwp - m;
+                    aa = ALT_MIN(aa, 1);
+                    alt_blend(image, x, y, sr, sg, sb, lround(aa*sa));
                 }
             }
             else if (inside) {
-                alt_blend(image, x, y, fill);
+                alt_blend(image, x, y, fr, fg, fb, fa);
             }
         }
     }
