@@ -489,14 +489,16 @@ alt_draw(alt_image_t *image, alt_window_t *window,
     alt_cross_t *ecross, *hcross;
     bool border, inside;
     double hlwp, d, m;
-    int x, y;
+    int x, y, i;
     hlwp = thick/2 + 0.5;
-    esl = window->extr[0];
-    hsl = window->hori[0];
-    for (y = window->y0; y < window->y0 + window->height; y++) {
+    i = 0;
+    for (y = window->y0; y < window->y0 + window->height; y++, i++) {
+        esl = window->extr[i];
+        hsl = window->hori[i];
         border = inside = false;
-        ecross = ALT_CAT(alt_cross_t, esl, 1);
-        hcross = ALT_CAT(alt_cross_t, hsl, 1);
+        ecross = (alt_cross_t *) esl->items;
+        hcross = (alt_cross_t *) hsl->items;
+        ecross++; hcross++;
         for (x = window->x0; x < window->x0 + window->width; x++) {
             if (x >= ecross->dist) {
                 border = !border;
@@ -523,6 +525,5 @@ alt_draw(alt_image_t *image, alt_window_t *window,
                 alt_blend(image, x, y, fill);
             }
         }
-        esl++; hsl++;
     }
 }
