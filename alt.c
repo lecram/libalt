@@ -329,13 +329,10 @@ alt_del_window(alt_window_t **window)
 double
 alt_scanrange(alt_array_t *scanline, double x)
 {
-    int i = 1;
-    while (ALT_CAT(alt_cross_t, scanline, i)->dist <= x)
-        i++;
-    return ALT_MIN(
-        ALT_CAT(alt_cross_t, scanline, i)->dist - x,
-        x - ALT_CAT(alt_cross_t, scanline, i-1)->dist
-    );
+    alt_cross_t *pcross;
+    pcross = (alt_cross_t *) scanline->items;
+    while ((++pcross)->dist <= x);
+    return ALT_MIN(pcross->dist - x, x - (pcross-1)->dist);
 }
 
 /* Return the minimum distance between (x, y) and the path scanned into
