@@ -49,7 +49,7 @@ alt_new_array(size_t item_size, unsigned int init_bulk)
     alt_array_t *array;
     array = (alt_array_t *) malloc(sizeof(alt_array_t));
     if (array == NULL) return NULL;
-    array->bulk = init_bulk || ALT_INIT_BULK;
+    array->bulk = init_bulk ? init_bulk : ALT_INIT_BULK;
     array->count = 0;
     array->size = item_size;
     array->items = malloc(array->bulk * array->size);
@@ -61,11 +61,11 @@ alt_new_array(size_t item_size, unsigned int init_bulk)
 void
 alt_resize_array(alt_array_t *array, unsigned int min_bulk)
 {
-    min_bulk = min_bulk || 2;
     while (array->bulk > min_bulk)
         array->bulk >>= 1;
     while (array->bulk < min_bulk)
         array->bulk <<= 1;
+    array->bulk = array->bulk ? array->bulk : 1;
     array->items = realloc(array->items, array->bulk * array->size);
 }
 
