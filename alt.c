@@ -606,7 +606,7 @@ alt_add_curve(alt_array_t *points, alt_curve_t *curve)
         c = subcurve.c;
         h = fabs((a.x-c.x)*(b.y-a.y)-(a.x-b.x)*(c.y-a.y)) /
             hypot(c.x-a.x, c.y-a.y);
-        if (h > 0.5) {
+        if (h > sqrt(2)) {
             /* Split curve. */
             d.x = (a.x+b.x)/2; d.y= (a.y+b.y)/2;
             f.x = (b.x+c.x)/2; f.y= (b.y+c.y)/2;
