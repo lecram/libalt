@@ -589,8 +589,8 @@ alt_add_curve(alt_array_t *points, alt_curve_t *curve)
 {
     /*  We split a Bézier curve into two subcurves repeatedly until we reach
      * almost-straight curves that are then output as straight segments.
-     *  The segments must be added in the correct order, so we need to do a
-     * depth-first search as we create a curve splitting tree.
+     *  Since the segments must be added in the correct order, we need to do
+     * a depth-first search as we create a tree of subcurves.
      */
     alt_array_t *stack;
     alt_curve_t subcurve;
