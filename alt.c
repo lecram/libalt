@@ -624,4 +624,5 @@ alt_add_curve(alt_array_t *points, alt_curve_t *curve)
             alt_push(points, &c);
         }
     }
+    alt_del_array(&stack);
 }
