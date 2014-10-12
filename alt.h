@@ -29,7 +29,7 @@ typedef struct {
 /* Raw 32-bit RGBA image. */
 typedef struct {
     int width, height;  /* image size in pixels */
-    uint8_t *data;     /* width*height pixels in format 0xRRGGBBAA */
+    uint8_t *data;      /* width*height pixels in format 0xRRGGBBAA */
 } alt_image_t;
 
 #define ALT_INIT_BULK 7
