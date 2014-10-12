@@ -580,3 +580,48 @@ alt_draw(alt_image_t *image, alt_window_t *window,
         }
     }
 }
+
+/* Convert `curve` to polyline and add resulting points to array.
+ * `points` is an array of alt_endpt_t.
+ */
+void
+alt_add_curve(alt_array_t *points, alt_curve_t *curve)
+{
+    /*  We split a Bézier curve into two subcurves repeatedly until we reach
+     * almost-straight curves that are then output as straight segments.
+     *  The segments must be added in the correct order, so we need to do a
+     * depth-first search as we create a curve splitting tree.
+     */
+    alt_array_t *stack;
+    alt_curve_t subcurve;
+    alt_endpt_t a, b, c;
+    alt_endpt_t d, e, f;
+    double h;
+    stack = alt_new_array(sizeof(alt_curve_t), ALT_INIT_BULK);
+    alt_push(stack, curve);
+    while (stack->count) {
+        alt_pop(stack, &subcurve);
+        a = subcurve.a;
+        b = subcurve.b;
+        c = subcurve.c;
+        h = fabs((a.x-c.x)*(b.y-a.y)-(a.x-b.x)*(c.y-a.y)) / hypot(c.x-a.x, c.y-a.y);
+        if (h > 0.5) {
+            /* Split curve. */
+            d.x = (a.x+b.x)/2; d.y= (a.y+b.y)/2;
+            f.x = (b.x+c.x)/2; f.y= (b.y+c.y)/2;
+            e.x = (d.x+f.x)/2; e.y= (d.y+f.y)/2;
+            subcurve.a = a;
+            subcurve.b = d;
+            subcurve.c = e;
+            alt_push(stack, &subcurve);
+            subcurve.a = e;
+            subcurve.b = f;
+            subcurve.c = c;
+            alt_push(stack, &subcurve);
+        }
+        else {
+            /* Add point to polyline. */
+            alt_push(points, &c);
+        }
+    }
+}

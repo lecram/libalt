@@ -24,6 +24,11 @@ typedef struct {
     bool on;
 } alt_ctrpt_t;
 
+/* Parameters of a single Bézier curve from A to C. */
+typedef struct {
+    alt_endpt_t a, b, c;
+} alt_curve_t;
+
 /* Raw 32-bit RGBA image. */
 typedef struct {
     int width, height;  /* image size in pixels */
@@ -95,5 +100,7 @@ double alt_dist(alt_window_t *window, double x, double y, double r);
 
 void alt_draw(alt_image_t *image, alt_window_t *window,
               uint32_t fill, uint32_t strk, double thick);
+
+void alt_add_curve(alt_array_t *points, alt_curve_t *curve);
 
 #endif /* _ALT_H */
