@@ -114,6 +114,7 @@ alt_new_image(int width, int height)
     return image;
 }
 
+/* Get pixel color at (x, y). */
 void
 alt_get_pixel(alt_image_t *image, int x, int y,
               uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *a)
@@ -126,6 +127,7 @@ alt_get_pixel(alt_image_t *image, int x, int y,
     *a = image->data[i+3];
 }
 
+/* Set pixel color at (x, y). */
 void
 alt_set_pixel(alt_image_t *image, int x, int y,
               uint8_t r, uint8_t g, uint8_t b, uint8_t a)
