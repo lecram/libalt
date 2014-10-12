@@ -109,7 +109,7 @@ alt_new_image(int width, int height)
     if (image == NULL) return NULL;
     image->width  = width;
     image->height = height;
-    image->data = (uint8_t *) calloc(4*width*height, sizeof(uint32_t));
+    image->data = (uint8_t *) calloc(4*width*height, sizeof(uint8_t));
     if (image->data == NULL) return NULL;
     return image;
 }
