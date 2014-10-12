@@ -21,7 +21,7 @@ typedef struct {
 /* Control point for Bézier curves. */
 typedef struct {
     double x, y;
-    int on;
+    bool on;
 } alt_ctrpt_t;
 
 #define ALT_PIX(I, X, Y) ((I)->data[4*((Y)*(I)->width+(X))])
