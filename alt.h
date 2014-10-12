@@ -24,8 +24,6 @@ typedef struct {
     bool on;
 } alt_ctrpt_t;
 
-#define ALT_PIX(I, X, Y) ((I)->data[4*((Y)*(I)->width+(X))])
-
 /* Raw 32-bit RGBA image. */
 typedef struct {
     int width, height;  /* image size in pixels */
