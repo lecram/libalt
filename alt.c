@@ -530,6 +530,10 @@ alt_dist(alt_window_t *window, double x, double y, double r)
     return mag * sqrt(2);
 }
 
+/* Draw scanned figure to `image`. 
+ * `fill` is the fill color; `strk` is the stroke color.
+ * `thick` is the line width (thickness) for stroke.
+ */
 void
 alt_draw(alt_image_t *image, alt_window_t *window,
          uint32_t fill, uint32_t strk, double thick)
