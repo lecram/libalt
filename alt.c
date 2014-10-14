@@ -684,6 +684,7 @@ alt_unfold(alt_array_t *ctrpts)
     return endpts;
 }
 
+/* Create a bezigon that approximates a circle of center (x, y) and radius r. */
 alt_array_t *
 alt_circle(double x, double y, double r)
 {
