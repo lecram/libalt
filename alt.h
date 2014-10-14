@@ -101,6 +101,7 @@ double alt_dist(alt_window_t *window, double x, double y, double r);
 void alt_draw(alt_image_t *image, alt_window_t *window,
               uint32_t fill, uint32_t strk, double thick);
 
-void alt_add_curve(alt_array_t *points, alt_curve_t *curve);
+void alt_add_curve(alt_array_t *endpts, alt_curve_t *curve);
+alt_array_t *alt_unfold(alt_array_t *ctrpts);
 
 #endif /* _ALT_H */

@@ -586,10 +586,10 @@ alt_draw(alt_image_t *image, alt_window_t *window,
 }
 
 /* Convert `curve` to polyline and add resulting points to array.
- * `points` is an array of alt_endpt_t.
+ * `endpts` is an array of alt_endpt_t.
  */
 void
-alt_add_curve(alt_array_t *points, alt_curve_t *curve)
+alt_add_curve(alt_array_t *endpts, alt_curve_t *curve)
 {
     /*  We split a Bézier curve into two subcurves repeatedly until we reach
      * almost-straight curves that are then output as straight segments.
@@ -626,8 +626,60 @@ alt_add_curve(alt_array_t *points, alt_curve_t *curve)
         }
         else {
             /* Add point to polyline. */
-            alt_push(points, &c);
+            alt_push(endpts, &c);
         }
     }
     alt_del_array(&stack);
+}
+
+/* Convert a sequence of linked Bézier curves to a polyline.
+ *  `ctrpts` is an array of alt_ctrpt_t. The boolean field `.on` indicates
+ * whether a point is on-curve or off-curve. On-curve points are end points;
+ * off-curve points are Bézier control points. If two off-curve points appear
+ * next to each other, an on-curve point is implied halfway between them.
+ * Return an array of alt_endpt_t. */
+alt_array_t *
+alt_unfold(alt_array_t *ctrpts)
+{
+    alt_ctrpt_t *s, *a, *b, m;
+    alt_array_t *endpts;
+    alt_curve_t curve;
+    int i;
+    m.on = true;
+    endpts = alt_new_array(sizeof(alt_endpt_t), ALT_INIT_BULK);
+    s = ALT_CAT(alt_ctrpt_t, ctrpts, 0);
+    b = ALT_CAT(alt_ctrpt_t, ctrpts, 1);
+    alt_push(endpts, s);
+    if (b->on) {
+        alt_push(endpts, b);
+        s = b;
+    }
+    for (i = 2; i < (int) ctrpts->count; i++) {
+        a = b;
+        b = ALT_CAT(alt_ctrpt_t, ctrpts, i);
+        if (a->on) {
+            if (b->on) {
+                alt_push(endpts, b);
+                s = b;
+            }
+        }
+        else {
+            if (b->on) {
+                curve.a.x = s->x; curve.a.y = s->y;
+                curve.b.x = a->x; curve.b.y = a->y;
+                curve.c.x = b->x; curve.c.y = b->y;
+                alt_add_curve(endpts, &curve);
+                s = b;
+            }
+            else {
+                m.x = (a->x + b->x) / 2; m.y = (a->y + b->y) / 2;
+                curve.a.x = s->x; curve.a.y = s->y;
+                curve.b.x = a->x; curve.b.y = a->y;
+                curve.c.x = m.x; curve.c.y = m.y;
+                alt_add_curve(endpts, &curve);
+                s = &m;
+            }
+        }
+    }
+    return endpts;
 }
