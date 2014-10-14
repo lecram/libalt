@@ -683,3 +683,34 @@ alt_unfold(alt_array_t *ctrpts)
     }
     return endpts;
 }
+
+alt_array_t *
+alt_circle(double x, double y, double r)
+{
+    double a;
+    alt_ctrpt_t ctrpt;
+    alt_array_t *ctrpts;
+    a = r * (sqrt(2) - 1);
+    ctrpts = alt_new_array(sizeof(alt_ctrpt_t), 10);
+    ctrpt.x = x; ctrpt.y = y+r; ctrpt.on = true;
+    alt_push(ctrpts, &ctrpt);
+    ctrpt.x = x+a; ctrpt.y = y+r; ctrpt.on = false;
+    alt_push(ctrpts, &ctrpt);
+    ctrpt.x = x+r; ctrpt.y = y+a; ctrpt.on = false;
+    alt_push(ctrpts, &ctrpt);
+    ctrpt.x = x+r; ctrpt.y = y-a; ctrpt.on = false;
+    alt_push(ctrpts, &ctrpt);
+    ctrpt.x = x+a; ctrpt.y = y-r; ctrpt.on = false;
+    alt_push(ctrpts, &ctrpt);
+    ctrpt.x = x-a; ctrpt.y = y-r; ctrpt.on = false;
+    alt_push(ctrpts, &ctrpt);
+    ctrpt.x = x-r; ctrpt.y = y-a; ctrpt.on = false;
+    alt_push(ctrpts, &ctrpt);
+    ctrpt.x = x-r; ctrpt.y = y+a; ctrpt.on = false;
+    alt_push(ctrpts, &ctrpt);
+    ctrpt.x = x-a; ctrpt.y = y+r; ctrpt.on = false;
+    alt_push(ctrpts, &ctrpt);
+    ctrpt.x = x; ctrpt.y = y+r; ctrpt.on = true;
+    alt_push(ctrpts, &ctrpt);
+    return ctrpts;
+}

@@ -103,5 +103,6 @@ void alt_draw(alt_image_t *image, alt_window_t *window,
 
 void alt_add_curve(alt_array_t *endpts, alt_curve_t *curve);
 alt_array_t *alt_unfold(alt_array_t *ctrpts);
+alt_array_t *alt_circle(double x, double y, double r);
 
 #endif /* _ALT_H */
