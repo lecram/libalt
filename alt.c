@@ -615,13 +615,13 @@ alt_add_curve(alt_array_t *endpts, alt_curve_t *curve)
             d.x = (a.x+b.x)/2; d.y= (a.y+b.y)/2;
             f.x = (b.x+c.x)/2; f.y= (b.y+c.y)/2;
             e.x = (d.x+f.x)/2; e.y= (d.y+f.y)/2;
-            subcurve.a = a;
-            subcurve.b = d;
-            subcurve.c = e;
-            alt_push(stack, &subcurve);
             subcurve.a = e;
             subcurve.b = f;
             subcurve.c = c;
+            alt_push(stack, &subcurve);
+            subcurve.a = a;
+            subcurve.b = d;
+            subcurve.c = e;
             alt_push(stack, &subcurve);
         }
         else {
@@ -672,9 +672,9 @@ alt_unfold(alt_array_t *ctrpts)
                 s = b;
             }
             else {
-                m.x = (a->x + b->x) / 2; m.y = (a->y + b->y) / 2;
                 curve.a.x = s->x; curve.a.y = s->y;
                 curve.b.x = a->x; curve.b.y = a->y;
+                m.x = (a->x + b->x) / 2; m.y = (a->y + b->y) / 2;
                 curve.c.x = m.x; curve.c.y = m.y;
                 alt_add_curve(endpts, &curve);
                 s = &m;
