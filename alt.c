@@ -715,3 +715,64 @@ alt_circle(double x, double y, double r)
     alt_push(ctrpts, &ctrpt);
     return ctrpts;
 }
+
+/* Reset matrix to identity map. */
+void
+alt_reset(alt_matrix_t *mat)
+{
+    mat->a = 1; mat->c = 0; mat->e = 0;
+    mat->b = 1; mat->d = 1; mat->f = 0;
+}
+
+void
+alt_add_custom(alt_matrix_t *mat, double a, double b,
+               double c, double d, double e, double f)
+{
+    double na, nb, nc, nd, ne, nf;
+    na = a*mat->a + c*mat->b;
+    nb = b*mat->a + d*mat->b;
+    nc = a*mat->c + c*mat->d;
+    nd = b*mat->c + d*mat->d;
+    ne = a*mat->e + c*mat->f + e;
+    nf = b*mat->e + d*mat->f + f;
+    mat->a = na; mat->c = nc; mat->e = ne;
+    mat->b = nb; mat->d = nd; mat->f = nf;
+}
+
+void
+alt_add_squeeze(alt_matrix_t *mat, double k)
+{
+    alt_add_custom(mat, k, 0, 0, 1/k, 0, 0);
+}
+
+void
+alt_add_scale(alt_matrix_t *mat, double x, double y)
+{
+    alt_add_custom(mat, x, 0, 0, y, 0, 0);
+}
+
+void
+alt_add_hshear(alt_matrix_t *mat, double h)
+{
+    alt_add_custom(mat, 1, 0, h, 1, 0, 0);
+}
+
+void
+alt_add_vshear(alt_matrix_t *mat, double v)
+{
+    alt_add_custom(mat, 1, v, 0, 1, 0, 0);
+}
+
+void
+alt_add_rotate(alt_matrix_t *mat, double a)
+{
+    double c, s;
+    c = cos(a); s = sin(a);
+    alt_add_custom(mat, c, -s, s, c, 0, 0);
+}
+
+void
+alt_add_translate(alt_matrix_t *mat, double x, double y)
+{
+    alt_add_custom(mat, 1, 0, 0, 1, x, y);
+}

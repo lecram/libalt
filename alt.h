@@ -61,6 +61,15 @@ typedef struct {
     alt_array_t **hori, **vert, **extr;
 } alt_window_t;
 
+/* Affine transformation matrix. */
+/* | a c e |
+ * | b d f |
+ * | 0 0 1 |
+ */
+typedef struct {
+    double a, b, c, d, e, f;
+} alt_matrix_t;
+
 bool alt_bbisnull(alt_bbox_t *bb);
 void alt_bbsetnull(alt_bbox_t *bb);
 void alt_bbinter(alt_bbox_t *bb1, alt_bbox_t *bb2);
@@ -104,5 +113,15 @@ void alt_draw(alt_image_t *image, alt_window_t *window,
 void alt_add_curve(alt_array_t *endpts, alt_curve_t *curve);
 alt_array_t *alt_unfold(alt_array_t *ctrpts);
 alt_array_t *alt_circle(double x, double y, double r);
+
+void alt_reset(alt_matrix_t *mat);
+void alt_add_custom(alt_matrix_t *mat, double a, double b,
+                    double c, double d, double e, double f);
+void alt_add_squeeze(alt_matrix_t *mat, double k);
+void alt_add_scale(alt_matrix_t *mat, double x, double y);
+void alt_add_hshear(alt_matrix_t *mat, double h);
+void alt_add_vshear(alt_matrix_t *mat, double v);
+void alt_add_rotate(alt_matrix_t *mat, double a);
+void alt_add_translate(alt_matrix_t *mat, double x, double y);
 
 #endif /* _ALT_H */
