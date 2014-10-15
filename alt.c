@@ -724,6 +724,7 @@ alt_reset(alt_matrix_t *mat)
     mat->b = 1; mat->d = 1; mat->f = 0;
 }
 
+/* Add a custom transformation to matrix. */
 void
 alt_add_custom(alt_matrix_t *mat, double a, double b,
                double c, double d, double e, double f)
@@ -739,30 +740,35 @@ alt_add_custom(alt_matrix_t *mat, double a, double b,
     mat->b = nb; mat->d = nd; mat->f = nf;
 }
 
+/* Add a squeeze transformation to matrix. */
 void
 alt_add_squeeze(alt_matrix_t *mat, double k)
 {
     alt_add_custom(mat, k, 0, 0, 1/k, 0, 0);
 }
 
+/* Add a scale transformation to matrix. */
 void
 alt_add_scale(alt_matrix_t *mat, double x, double y)
 {
     alt_add_custom(mat, x, 0, 0, y, 0, 0);
 }
 
+/* Add a horizontal shear transformation to matrix. */
 void
 alt_add_hshear(alt_matrix_t *mat, double h)
 {
     alt_add_custom(mat, 1, 0, h, 1, 0, 0);
 }
 
+/* Add a vertical shear transformation to matrix. */
 void
 alt_add_vshear(alt_matrix_t *mat, double v)
 {
     alt_add_custom(mat, 1, v, 0, 1, 0, 0);
 }
 
+/* Add a rotation to matrix. `a` is the angle in radians. */
 void
 alt_add_rotate(alt_matrix_t *mat, double a)
 {
@@ -771,6 +777,7 @@ alt_add_rotate(alt_matrix_t *mat, double a)
     alt_add_custom(mat, c, -s, s, c, 0, 0);
 }
 
+/* Add a translation to matrix. */
 void
 alt_add_translate(alt_matrix_t *mat, double x, double y)
 {
