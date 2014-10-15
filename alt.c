@@ -544,10 +544,14 @@ alt_draw(alt_image_t *image, alt_window_t *window,
     double hlwp, d, m, aa;
     uint8_t fr, fg, fb, fa;
     uint8_t sr, sg, sb, sa;
-    int x, y, i;
+    int x0, y0, x1, y1, x, y, i;
     alt_unpack_color(fill, &fr, &fg, &fb, &fa);
     alt_unpack_color(strk, &sr, &sg, &sb, &sa);
     hlwp = thick/2 + 0.5;
+    x0 = ALT_MAX(0, window->x0);
+    y0 = ALT_MAX(0, window->y0);
+    x1 = ALT_MIN(image->width, window->x0 + window->width);
+    y1 = ALT_MIN(image->height, window->y0 + window->height);
     i = 0;
     for (y = window->y0; y < window->y0 + window->height; y++, i++) {
         esl = window->extr[i];
@@ -565,21 +569,23 @@ alt_draw(alt_image_t *image, alt_window_t *window,
                 inside = !inside;
                 hcross++;
             }
-            if (border) {
-                d = alt_dist(window, x, y, hlwp);
-                m = fabs(d);
-                if (inside) {
-                    aa = ALT_MIN(d, 1);
-                    alt_blend(image, x, y, fr, fg, fb, lround(aa*fa));
+            if (x0 <= x && x < x1 && y0 <= y && y < y1) {
+                if (border) {
+                    d = alt_dist(window, x, y, hlwp);
+                    m = fabs(d);
+                    if (inside) {
+                        aa = ALT_MIN(d, 1);
+                        alt_blend(image, x, y, fr, fg, fb, lround(aa*fa));
+                    }
+                    if (m < hlwp) {
+                        aa = hlwp - m;
+                        aa = ALT_MIN(aa, 1);
+                        alt_blend(image, x, y, sr, sg, sb, lround(aa*sa));
+                    }
                 }
-                if (m < hlwp) {
-                    aa = hlwp - m;
-                    aa = ALT_MIN(aa, 1);
-                    alt_blend(image, x, y, sr, sg, sb, lround(aa*sa));
+                else if (inside) {
+                    alt_blend(image, x, y, fr, fg, fb, fa);
                 }
-            }
-            else if (inside) {
-                alt_blend(image, x, y, fr, fg, fb, fa);
             }
         }
     }
