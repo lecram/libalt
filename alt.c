@@ -783,3 +783,33 @@ alt_add_translate(alt_matrix_t *mat, double x, double y)
 {
     alt_add_custom(mat, 1, 0, 0, 1, x, y);
 }
+
+/* Apply affine transformation to all end points. */
+void
+alt_transform_endpts(alt_array_t *endpts, alt_matrix_t *mat)
+{
+    alt_endpt_t *endpt;
+    double x, y;
+    int i;
+    for (i = 0; i < (int) endpts->count; i++) {
+        endpt = ALT_CAT(alt_endpt_t, endpts, i);
+        x = mat->a*endpt->x + mat->c*endpt->y + mat->e;
+        y = mat->b*endpt->x + mat->d*endpt->y + mat->f;
+        endpt->x = x; endpt->y = y;
+    }
+}
+
+/* Apply affine transformation to all control points. */
+void
+alt_transform_ctrpts(alt_array_t *ctrpts, alt_matrix_t *mat)
+{
+    alt_ctrpt_t *ctrpt;
+    double x, y;
+    int i;
+    for (i = 0; i < (int) ctrpts->count; i++) {
+        ctrpt = ALT_CAT(alt_ctrpt_t, ctrpts, i);
+        x = mat->a*ctrpt->x + mat->c*ctrpt->y + mat->e;
+        y = mat->b*ctrpt->x + mat->d*ctrpt->y + mat->f;
+        ctrpt->x = x; ctrpt->y = y;
+    }
+}
