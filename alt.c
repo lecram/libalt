@@ -721,7 +721,7 @@ void
 alt_reset(alt_matrix_t *mat)
 {
     mat->a = 1; mat->c = 0; mat->e = 0;
-    mat->b = 1; mat->d = 1; mat->f = 0;
+    mat->b = 0; mat->d = 1; mat->f = 0;
 }
 
 /* Add a custom transformation to matrix. */
