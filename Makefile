@@ -11,7 +11,7 @@ all: libalt.so
 libalt.so: alt.o
 	gcc -shared -o $@ $<
 
-alt.o: alt.c
+alt.o: alt.c alt.h
 	gcc ${CFLAGS} -c -fpic -o $@ $< -lm
 
 .PHONY: clean
