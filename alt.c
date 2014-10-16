@@ -552,8 +552,8 @@ alt_draw(alt_image_t *image, alt_window_t *window,
     y0 = ALT_MAX(0, window->y0);
     x1 = ALT_MIN(image->width, window->x0 + window->width);
     y1 = ALT_MIN(image->height, window->y0 + window->height);
-    i = 0;
-    for (y = window->y0; y < window->y0 + window->height; y++, i++) {
+    i = y0 - window->y0;
+    for (y = y0; y < y1; y++, i++) {
         esl = window->extr[i];
         hsl = window->hori[i];
         border = inside = false;
