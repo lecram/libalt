@@ -8,11 +8,6 @@
 #define ALT_MIN(A, B) ((A) < (B) ? (A) : (B))
 #define ALT_MAX(A, B) ((A) > (B) ? (A) : (B))
 
-/* Bounding box. */
-typedef struct {
-    double x0, y0, x1, y1;
-} alt_bbox_t;
-
 /* End point for line segments. */
 typedef struct {
     double x, y;
@@ -64,13 +59,6 @@ typedef struct {
 typedef struct {
     double a, b, c, d, e, f;
 } alt_matrix_t;
-
-bool alt_bbisnull(alt_bbox_t *bb);
-void alt_bbsetnull(alt_bbox_t *bb);
-void alt_bbinter(alt_bbox_t *bb1, alt_bbox_t *bb2);
-void alt_bbunion(alt_bbox_t *bb1, alt_bbox_t *bb2);
-void alt_bbmargin(alt_bbox_t *bb, double mg);
-void alt_bound(alt_endpt_t *points, int count, alt_bbox_t *bb);
 
 uint32_t alt_pack_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 void alt_unpack_color(uint32_t color, uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *a);
