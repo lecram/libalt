@@ -309,13 +309,12 @@ alt_new_window(alt_bbox_t *bb)
     return window;
 }
 
-/* Scan `count` points at `points` and add intersections to `window`.
+/* Scan segment pa-pb and add intersections to `window`.
  * `range` is the line width for the extra scan.
  */
 void
-alt_scan(alt_window_t *window, alt_endpt_t *points, int count, double range)
+alt_scan(alt_window_t *window, alt_endpt_t *pa, alt_endpt_t *pb, double range)
 {
-    alt_endpt_t pa, pb;
     alt_array_t *scanline;
     alt_cross_t cross;
     double radius;
@@ -325,91 +324,102 @@ alt_scan(alt_window_t *window, alt_endpt_t *points, int count, double range)
     double slope;
     int hsign, vsign;
     int sx, sy;
-    int i, y;
+    int y;
     radius = range / 2;
+    /*  Define a segment from (vxa, vya) to (vxb, vyb) that coincides with 
+     * pa-pb, but is guaranteed to be x-ascending.
+     */
+    if (pa->x < pb->x) {
+        hsign = +1;
+        vxa = pa->x; vya = pa->y; vxb = pb->x; vyb = pb->y;
+    }
+    else {
+        hsign = -1;
+        vxa = pb->x; vya = pb->y; vxb = pa->x; vyb = pa->y;
+    }
+    /*  Define a segment from (hxa, hya) to (hxb, hyb) that coincides with 
+     * pa-pb, but is guaranteed to be y-ascending.
+     */
+    if (pa->y < pb->y) {
+        vsign = +1;
+        hxa = pa->x; hya = pa->y; hxb = pb->x; hyb = pb->y;
+    }
+    else {
+        vsign = -1;
+        hxa = pb->x; hya = pb->y; hxb = pa->x; hyb = pa->y;
+    }
+    vxa = round(vxa); vxb = round(vxb);
+    hya = round(hya); hyb = round(hyb);
+    /*  Add orthogonal intersections to extra scan. This is suboptimal for
+     * diagonal segments, specially when fabs(slope) ~ 1.
+     */
+    ex0 = floor(vxa-radius); ey0 = floor(hya-radius);
+    ex1 = ceil(vxb+radius)+1; ey1 = ceil(hyb+radius)+1;
+    cross.dist = ex0; cross.sign = +1;
+    for (y = (int) ey0; y < (int) ey1; y++) {
+        scanline = window->extr[y-window->y0];
+        alt_push(scanline, &cross);
+    }
+    cross.dist = ex1; cross.sign = -1;
+    for (y = (int) ey0; y < (int) ey1; y++) {
+        scanline = window->extr[y-window->y0];
+        alt_push(scanline, &cross);
+    }
+    if (pa->y == pb->y) {
+        /* Horizontal segment. */
+        cross.dist = pa->y; cross.sign = hsign;
+        while (vxa < vxb) {
+            scanline = window->vert[((int) vxa)-window->x0];
+            alt_push(scanline, &cross);
+            vxa++;
+        }
+    }
+    else if (pa->x == pb->x) {
+        /* Vertical segment. */
+        cross.dist = pa->x; cross.sign = vsign;
+        while (hya < hyb) {
+            scanline = window->hori[((int) hya)-window->y0];
+            alt_push(scanline, &cross);
+            hya++;
+        }
+    }
+    else {
+        /* Diagonal segment. */
+        sy = vya < vyb ? +1 : -1;
+        slope = (vxb-vxa) / (hyb-hya);
+        cross.sign = hsign;
+        while (vxa < vxb) {
+            scanline = window->vert[((int) vxa)-window->x0];
+            cross.dist = vya;
+            alt_push(scanline, &cross);
+            vya += sy / slope;
+            vxa++;
+        }
+        sx = hxa < hxb ? +1 : -1;
+        slope = 1 / slope;
+        cross.sign = vsign;
+        while (hya < hyb) {
+            scanline = window->hori[((int) hya)-window->y0];
+            cross.dist = hxa;
+            alt_push(scanline, &cross);
+            hxa += sx / slope;
+            hya++;
+        }
+    }
+}
+
+/* Scan `count` points at `points` and add intersections to `window`.
+ * `range` is the line width for the extra scan.
+ */
+void
+alt_scan_array(alt_window_t *window, alt_endpt_t *points, int count, double range)
+{
+    int i;
+    alt_endpt_t pa, pb;
     for (i = 0; i < count-1; i++) {
         pa = points[i];
         pb = points[i+1];
-        /*  Define a segment from (vxa, vya) to (vxb, vyb) that coincides with 
-         * pa-pb, but is guaranteed to be x-ascending.
-         */
-        if (pa.x < pb.x) {
-            hsign = +1;
-            vxa = pa.x; vya = pa.y; vxb = pb.x; vyb = pb.y;
-        }
-        else {
-            hsign = -1;
-            vxa = pb.x; vya = pb.y; vxb = pa.x; vyb = pa.y;
-        }
-        /*  Define a segment from (hxa, hya) to (hxb, hyb) that coincides with 
-         * pa-pb, but is guaranteed to be y-ascending.
-         */
-        if (pa.y < pb.y) {
-            vsign = +1;
-            hxa = pa.x; hya = pa.y; hxb = pb.x; hyb = pb.y;
-        }
-        else {
-            vsign = -1;
-            hxa = pb.x; hya = pb.y; hxb = pa.x; hyb = pa.y;
-        }
-        vxa = round(vxa); vxb = round(vxb);
-        hya = round(hya); hyb = round(hyb);
-        /*  Add orthogonal intersections to extra scan. This is suboptimal for
-         * diagonal segments, specially when fabs(slope) ~ 1.
-         */
-        ex0 = floor(vxa-radius); ey0 = floor(hya-radius);
-        ex1 = ceil(vxb+radius)+1; ey1 = ceil(hyb+radius)+1;
-        cross.dist = ex0; cross.sign = +1;
-        for (y = (int) ey0; y < (int) ey1; y++) {
-            scanline = window->extr[y-window->y0];
-            alt_push(scanline, &cross);
-        }
-        cross.dist = ex1; cross.sign = -1;
-        for (y = (int) ey0; y < (int) ey1; y++) {
-            scanline = window->extr[y-window->y0];
-            alt_push(scanline, &cross);
-        }
-        if (pa.y == pb.y) {
-            /* Horizontal segment. */
-            cross.dist = pa.y; cross.sign = hsign;
-            while (vxa < vxb) {
-                scanline = window->vert[((int) vxa)-window->x0];
-                alt_push(scanline, &cross);
-                vxa++;
-            }
-        }
-        else if (pa.x == pb.x) {
-            /* Vertical segment. */
-            cross.dist = pa.x; cross.sign = vsign;
-            while (hya < hyb) {
-                scanline = window->hori[((int) hya)-window->y0];
-                alt_push(scanline, &cross);
-                hya++;
-            }
-        }
-        else {
-            /* Diagonal segment. */
-            sy = vya < vyb ? +1 : -1;
-            slope = (vxb-vxa) / (hyb-hya);
-            cross.sign = hsign;
-            while (vxa < vxb) {
-                scanline = window->vert[((int) vxa)-window->x0];
-                cross.dist = vya;
-                alt_push(scanline, &cross);
-                vya += sy / slope;
-                vxa++;
-            }
-            sx = hxa < hxb ? +1 : -1;
-            slope = 1 / slope;
-            cross.sign = vsign;
-            while (hya < hyb) {
-                scanline = window->hori[((int) hya)-window->y0];
-                cross.dist = hxa;
-                alt_push(scanline, &cross);
-                hxa += sx / slope;
-                hya++;
-            }
-        }
+        alt_scan(window, &pa, &pb, range);
     }
 }
 
