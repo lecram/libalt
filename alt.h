@@ -29,12 +29,6 @@ typedef struct {
     alt_endpt_t a, b, c;
 } alt_curve_t;
 
-/* Raw 32-bit RGBA image. */
-typedef struct {
-    int width, height;  /* image size in pixels */
-    uint8_t *data;      /* width*height pixels in format 0xRRGGBBAA */
-} alt_image_t;
-
 #define ALT_INIT_BULK 7
 
 #define ALT_AT(A, I) ((A)->items + (I) * (A)->size)
@@ -48,18 +42,19 @@ typedef struct {
     void *items;        /* actual array contents */
 } alt_array_t;
 
+/* Raw 32-bit RGBA image. */
+typedef struct {
+    int width, height;  /* image size in pixels */
+    /* Arrays of arrays of alt_cross_t. */
+    alt_array_t **hori, **vert, **extr;
+    uint8_t *data;      /* width*height pixels in format 0xRRGGBBAA */
+} alt_image_t;
+
 /* Signed scanline intersection. */
 typedef struct {
     double dist;    /* distance from scanline origin */
     int sign;       /* 1 for off-on crossing, -1 for on-off */
 } alt_cross_t;
-
-/* Scan window. */
-typedef struct {
-    int x0, y0, width, height;
-    /* Arrays of arrays of alt_cross_t. */
-    alt_array_t **hori, **vert, **extr;
-} alt_window_t;
 
 /* Affine transformation matrix. */
 /* | a c e |
@@ -99,17 +94,14 @@ void alt_del_array(alt_array_t **array);
 
 int alt_comp_cross(const void *a, const void *b);
 
-alt_window_t *alt_new_window(alt_bbox_t *bb);
-void alt_scan(alt_window_t *window, alt_endpt_t *pa, alt_endpt_t *pb, double range);
-void alt_scan_array(alt_window_t *window, alt_endpt_t *points, int count, double range);
-void alt_windredux(alt_window_t *window);
-void alt_del_window(alt_window_t **window);
+void alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb, double range);
+void alt_scan_array(alt_image_t *image, alt_endpt_t *points, int count, double range);
+void alt_windredux(alt_image_t *image);
 
 double alt_scanrange(alt_array_t *scanline, double x);
-double alt_dist(alt_window_t *window, double x, double y, double r);
+double alt_dist(alt_image_t *image, double x, double y, double r);
 
-void alt_draw(alt_image_t *image, alt_window_t *window,
-              uint32_t fill, uint32_t strk, double thick);
+void alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk, double thick);
 
 void alt_add_curve(alt_array_t *endpts, alt_curve_t *curve);
 alt_array_t *alt_unfold(alt_array_t *ctrpts);

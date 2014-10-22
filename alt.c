@@ -105,10 +105,25 @@ alt_image_t *
 alt_new_image(int width, int height)
 {
     alt_image_t *image;
+    int i;
     image = (alt_image_t *) malloc(sizeof(alt_image_t));
     if (image == NULL) return NULL;
     image->width  = width;
     image->height = height;
+    image->hori = (alt_array_t **) malloc(image->height * sizeof(alt_array_t *));
+    image->vert = (alt_array_t **) malloc(image->width  * sizeof(alt_array_t *));
+    image->extr = (alt_array_t **) malloc(image->height * sizeof(alt_array_t *));
+    if (image->hori == NULL || image->vert == NULL || image->extr == NULL)
+        return NULL;
+    for (i = 0; i < image->width; i++) {
+        image->vert[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
+        if (image->vert[i] == NULL) return NULL;
+    }
+    for (i = 0; i < image->height; i++) {
+        image->hori[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
+        image->extr[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
+        if (image->hori[i] == NULL || image->extr[i] == NULL) return NULL;
+    }
     image->data = (uint8_t *) calloc(4*width*height, sizeof(uint8_t));
     if (image->data == NULL) return NULL;
     return image;
@@ -200,6 +215,17 @@ alt_save_pam(alt_image_t *image, char *fname)
 void
 alt_del_image(alt_image_t **image)
 {
+    int i;
+    for (i = 0; i < (*image)->width; i++) {
+        alt_del_array(&(*image)->vert[i]);
+    }
+    for (i = 0; i < (*image)->height; i++) {
+        alt_del_array(&(*image)->hori[i]);
+        alt_del_array(&(*image)->extr[i]);
+    }
+    free((*image)->hori);
+    free((*image)->vert);
+    free((*image)->extr);
     free((*image)->data);
     free(*image);
     *image = NULL;
@@ -280,40 +306,11 @@ alt_comp_cross(const void *a, const void *b)
     return arg1->dist - arg2->dist;
 }
 
-/* Create a new scan window. */
-alt_window_t *
-alt_new_window(alt_bbox_t *bb)
-{
-    alt_window_t *window;
-    int i;
-    window = (alt_window_t *) malloc(sizeof(alt_window_t));
-    if (window == NULL) return NULL;
-    window->x0 = (int) floor(bb->x0);
-    window->y0 = (int) floor(bb->y0);
-    window->width  = (int) (ceil(bb->x1) - floor(bb->x0) + 1);
-    window->height = (int) (ceil(bb->y1) - floor(bb->y0) + 1);
-    window->hori = (alt_array_t **) malloc(window->height * sizeof(alt_array_t *));
-    window->vert = (alt_array_t **) malloc(window->width  * sizeof(alt_array_t *));
-    window->extr = (alt_array_t **) malloc(window->height * sizeof(alt_array_t *));
-    if (window->hori == NULL || window->vert == NULL || window->extr == NULL)
-        return NULL;
-    for (i = 0; i < window->width; i++) {
-        window->vert[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
-        if (window->vert[i] == NULL) return NULL;
-    }
-    for (i = 0; i < window->height; i++) {
-        window->hori[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
-        window->extr[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
-        if (window->hori[i] == NULL || window->extr[i] == NULL) return NULL;
-    }
-    return window;
-}
-
-/* Scan segment pa-pb and add intersections to `window`.
+/* Scan segment pa-pb and add intersections to `image`.
  * `range` is the line width for the extra scan.
  */
 void
-alt_scan(alt_window_t *window, alt_endpt_t *pa, alt_endpt_t *pb, double range)
+alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb, double range)
 {
     alt_array_t *scanline;
     alt_cross_t cross;
@@ -357,19 +354,19 @@ alt_scan(alt_window_t *window, alt_endpt_t *pa, alt_endpt_t *pb, double range)
     ex1 = ceil(vxb+radius)+1; ey1 = ceil(hyb+radius)+1;
     cross.dist = ex0; cross.sign = +1;
     for (y = (int) ey0; y < (int) ey1; y++) {
-        scanline = window->extr[y-window->y0];
+        scanline = image->extr[y];
         alt_push(scanline, &cross);
     }
     cross.dist = ex1; cross.sign = -1;
     for (y = (int) ey0; y < (int) ey1; y++) {
-        scanline = window->extr[y-window->y0];
+        scanline = image->extr[y];
         alt_push(scanline, &cross);
     }
     if (pa->y == pb->y) {
         /* Horizontal segment. */
         cross.dist = pa->y; cross.sign = hsign;
         while (vxa < vxb) {
-            scanline = window->vert[((int) vxa)-window->x0];
+            scanline = image->vert[((int) vxa)];
             alt_push(scanline, &cross);
             vxa++;
         }
@@ -378,7 +375,7 @@ alt_scan(alt_window_t *window, alt_endpt_t *pa, alt_endpt_t *pb, double range)
         /* Vertical segment. */
         cross.dist = pa->x; cross.sign = vsign;
         while (hya < hyb) {
-            scanline = window->hori[((int) hya)-window->y0];
+            scanline = image->hori[((int) hya)];
             alt_push(scanline, &cross);
             hya++;
         }
@@ -389,7 +386,7 @@ alt_scan(alt_window_t *window, alt_endpt_t *pa, alt_endpt_t *pb, double range)
         slope = (vxb-vxa) / (hyb-hya);
         cross.sign = hsign;
         while (vxa < vxb) {
-            scanline = window->vert[((int) vxa)-window->x0];
+            scanline = image->vert[((int) vxa)];
             cross.dist = vya;
             alt_push(scanline, &cross);
             vya += sy / slope;
@@ -399,7 +396,7 @@ alt_scan(alt_window_t *window, alt_endpt_t *pa, alt_endpt_t *pb, double range)
         slope = 1 / slope;
         cross.sign = vsign;
         while (hya < hyb) {
-            scanline = window->hori[((int) hya)-window->y0];
+            scanline = image->hori[((int) hya)];
             cross.dist = hxa;
             alt_push(scanline, &cross);
             hxa += sx / slope;
@@ -408,18 +405,18 @@ alt_scan(alt_window_t *window, alt_endpt_t *pa, alt_endpt_t *pb, double range)
     }
 }
 
-/* Scan `count` points at `points` and add intersections to `window`.
+/* Scan `count` points at `points` and add intersections to `image`.
  * `range` is the line width for the extra scan.
  */
 void
-alt_scan_array(alt_window_t *window, alt_endpt_t *points, int count, double range)
+alt_scan_array(alt_image_t *image, alt_endpt_t *points, int count, double range)
 {
     int i;
     alt_endpt_t pa, pb;
     for (i = 0; i < count-1; i++) {
         pa = points[i];
         pb = points[i+1];
-        alt_scan(window, &pa, &pb, range);
+        alt_scan(image, &pa, &pb, range);
     }
 }
 
@@ -427,18 +424,18 @@ alt_scan_array(alt_window_t *window, alt_endpt_t *points, int count, double rang
  * Only crossings that goes to or come from a zero winding number are kept.
  */
 void
-alt_windredux(alt_window_t *window)
+alt_windredux(alt_image_t *image)
 {
     alt_array_t **scans[3], *scanline;
     alt_cross_t cross, *pcross;
     int count[3];
     int winda, windb;
     int i, j, k;
-    scans[0] = window->vert;
-    scans[1] = window->hori;
-    scans[2] = window->extr;
-    count[0] = window->width;
-    count[1] = count[2] = window->height;
+    scans[0] = image->vert;
+    scans[1] = image->hori;
+    scans[2] = image->extr;
+    count[0] = image->width;
+    count[1] = count[2] = image->height;
     for (i = 0; i < 3; i++) {
         for (j = 0; j < count[i]; j++) {
             alt_sort(scans[i][j], alt_comp_cross);
@@ -470,25 +467,6 @@ alt_windredux(alt_window_t *window)
     }
 }
 
-/* Delete `window` and its content from memory. */
-void
-alt_del_window(alt_window_t **window)
-{
-    int i;
-    for (i = 0; i < (*window)->width; i++) {
-        alt_del_array(&(*window)->vert[i]);
-    }
-    for (i = 0; i < (*window)->height; i++) {
-        alt_del_array(&(*window)->hori[i]);
-        alt_del_array(&(*window)->extr[i]);
-    }
-    free((*window)->hori);
-    free((*window)->vert);
-    free((*window)->extr);
-    free(*window);
-    *window = NULL;
-}
-
 /* Return the minimum distance from `x` to its closest point on `scanline`.
  * Note that x here is a 1D coordinate that follows the scanline's direction.
  * This function is only used as a helper to alt_dist().
@@ -503,32 +481,32 @@ alt_scanrange(alt_array_t *scanline, double x)
 }
 
 /* Return the minimum distance between (x, y) and the path scanned into
- * `window`. If that path doesn't intersect the disk of radius `r`
- * centered at (x, y), then return `r`.
+ * `image`. If that path doesn't intersect the disk of radius `r` centered
+ * at (x, y), then return `r`.
  * This function implements the L1L2 algorithm.
  */
 double
-alt_dist(alt_window_t *window, double x, double y, double r)
+alt_dist(alt_image_t *image, double x, double y, double r)
 {
     double mind, mag;
     double j, d, d1, d2;
     int i, xi, yi;
-    xi = x - window->x0;
-    yi = y - window->y0;
+    xi = x;
+    yi = y;
     i = 0;
     mind = r*r;
     mag = r/sqrt(2.0);
     do {
         d1 = i*i;
         j = HUGE_VAL;
-        if (xi-i >= 0 && xi-i < window->width)
-            j = ALT_MIN(j, alt_scanrange(window->vert[xi-i], y));
-        if (xi+i >= 0 && xi+i < window->width)
-            j = ALT_MIN(j, alt_scanrange(window->vert[xi+i], y));
-        if (yi-i >= 0 && yi-i < window->height)
-            j = ALT_MIN(j, alt_scanrange(window->hori[yi-i], x));
-        if (yi+i >= 0 && yi+i < window->height)
-            j = ALT_MIN(j, alt_scanrange(window->hori[yi+i], x));
+        if (xi-i >= 0 && xi-i < image->width)
+            j = ALT_MIN(j, alt_scanrange(image->vert[xi-i], y));
+        if (xi+i >= 0 && xi+i < image->width)
+            j = ALT_MIN(j, alt_scanrange(image->vert[xi+i], y));
+        if (yi-i >= 0 && yi-i < image->height)
+            j = ALT_MIN(j, alt_scanrange(image->hori[yi-i], x));
+        if (yi+i >= 0 && yi+i < image->height)
+            j = ALT_MIN(j, alt_scanrange(image->hori[yi+i], x));
         d2 = j*j;
         d = d1 + d2;
         if (d < mind) {
@@ -545,8 +523,7 @@ alt_dist(alt_window_t *window, double x, double y, double r)
  * `thick` is the line width (thickness) for stroke.
  */
 void
-alt_draw(alt_image_t *image, alt_window_t *window,
-         uint32_t fill, uint32_t strk, double thick)
+alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk, double thick)
 {
     alt_array_t *esl, *hsl;
     alt_cross_t *ecross, *hcross;
@@ -558,19 +535,19 @@ alt_draw(alt_image_t *image, alt_window_t *window,
     alt_unpack_color(fill, &fr, &fg, &fb, &fa);
     alt_unpack_color(strk, &sr, &sg, &sb, &sa);
     hlwp = thick/2 + 0.5;
-    x0 = ALT_MAX(0, window->x0);
-    y0 = ALT_MAX(0, window->y0);
-    x1 = ALT_MIN(image->width, window->x0 + window->width);
-    y1 = ALT_MIN(image->height, window->y0 + window->height);
-    i = y0 - window->y0;
+    x0 = 0;
+    y0 = 0;
+    x1 = image->width;
+    y1 = image->height;
+    i = y0;
     for (y = y0; y < y1; y++, i++) {
-        esl = window->extr[i];
-        hsl = window->hori[i];
+        esl = image->extr[i];
+        hsl = image->hori[i];
         border = inside = false;
         ecross = (alt_cross_t *) esl->items;
         hcross = (alt_cross_t *) hsl->items;
         ecross++; hcross++;
-        for (x = window->x0; x < window->x0 + window->width; x++) {
+        for (x = 0; x < image->width; x++) {
             if (x >= ecross->dist) {
                 border = !border;
                 ecross++;
@@ -581,7 +558,7 @@ alt_draw(alt_image_t *image, alt_window_t *window,
             }
             if (x0 <= x && x < x1 && y0 <= y && y < y1) {
                 if (border) {
-                    d = alt_dist(window, x, y, hlwp);
+                    d = alt_dist(image, x, y, hlwp);
                     m = fabs(d);
                     if (inside) {
                         aa = ALT_MIN(d, 1);
