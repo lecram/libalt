@@ -47,6 +47,7 @@ typedef struct {
 typedef struct {
     int width, height;  /* image size in pixels */
     int x0, y0, x1, y1; /* dirty region boundaries */
+    double diameter;    /* pen diameter */
     /* Arrays of arrays of alt_cross_t. */
     alt_array_t **hori, **vert, **extr;
     uint8_t *data;      /* width*height pixels in format 0xRRGGBBAA */
@@ -73,6 +74,7 @@ int alt_comp_cross(const void *a, const void *b);
 uint32_t alt_pack_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 void alt_unpack_color(uint32_t color, uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *a);
 alt_image_t *alt_new_image(int width, int height);
+void alt_set_line_width(alt_image_t *image, double line_width);
 void alt_get_pixel(alt_image_t *image, int x, int y,
                    uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *a);
 void alt_set_pixel(alt_image_t *image, int x, int y,
@@ -83,14 +85,14 @@ void alt_blend(alt_image_t *image, int x, int y,
 void alt_save_pam(alt_image_t *image, char *fname);
 void alt_del_image(alt_image_t **image);
 
-void alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb, double range);
-void alt_scan_array(alt_image_t *image, alt_endpt_t *points, int count, double range);
+void alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb);
+void alt_scan_array(alt_image_t *image, alt_endpt_t *points, int count);
 void alt_windredux(alt_image_t *image);
 
 double alt_scanrange(alt_array_t *scanline, double x);
 double alt_dist(alt_image_t *image, double x, double y, double r);
 
-void alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk, double thick);
+void alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk);
 
 void alt_add_curve(alt_array_t *endpts, alt_curve_t *curve);
 alt_array_t *alt_unfold(alt_array_t *ctrpts);

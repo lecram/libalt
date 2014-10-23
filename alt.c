@@ -110,6 +110,7 @@ alt_new_image(int width, int height)
     image->height = height;
     image->x0 = image->y0 = INT_MAX;
     image->x1 = image->y1 = INT_MIN;
+    image->diameter = 1;
     image->hori = (alt_array_t **) malloc(image->height * sizeof(alt_array_t *));
     image->vert = (alt_array_t **) malloc(image->width  * sizeof(alt_array_t *));
     image->extr = (alt_array_t **) malloc(image->height * sizeof(alt_array_t *));
@@ -127,6 +128,13 @@ alt_new_image(int width, int height)
     image->data = (uint8_t *) calloc(4*width*height, sizeof(uint8_t));
     if (image->data == NULL) return NULL;
     return image;
+}
+
+/* Set pen diameter. */
+void
+alt_set_line_width(alt_image_t *image, double line_width)
+{
+    image->diameter = line_width;
 }
 
 /* Get pixel color at (x, y). */
@@ -231,11 +239,9 @@ alt_del_image(alt_image_t **image)
     *image = NULL;
 }
 
-/* Scan segment pa-pb and add intersections to `image`.
- * `range` is the line width for the extra scan.
- */
+/* Scan segment pa-pb and add intersections to `image`. */
 void
-alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb, double range)
+alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb)
 {
     alt_array_t *scanline;
     alt_cross_t cross;
@@ -247,7 +253,7 @@ alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb, double range)
     int hsign, vsign;
     int sx, sy;
     int y;
-    radius = range / 2;
+    radius = image->diameter / 2;
     /*  Define a segment from (vxa, vya) to (vxb, vyb) that coincides with 
      * pa-pb, but is guaranteed to be x-ascending.
      */
@@ -334,18 +340,16 @@ alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb, double range)
     }
 }
 
-/* Scan `count` points at `points` and add intersections to `image`.
- * `range` is the line width for the extra scan.
- */
+/* Scan `count` points at `points` and add intersections to `image`. */
 void
-alt_scan_array(alt_image_t *image, alt_endpt_t *points, int count, double range)
+alt_scan_array(alt_image_t *image, alt_endpt_t *points, int count)
 {
     int i;
     alt_endpt_t pa, pb;
     for (i = 0; i < count-1; i++) {
         pa = points[i];
         pb = points[i+1];
-        alt_scan(image, &pa, &pb, range);
+        alt_scan(image, &pa, &pb);
     }
 }
 
@@ -449,10 +453,9 @@ alt_dist(alt_image_t *image, double x, double y, double r)
 
 /* Draw scanned figure to `image`. 
  * `fill` is the fill color; `strk` is the stroke color.
- * `thick` is the line width (thickness) for stroke.
  */
 void
-alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk, double thick)
+alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk)
 {
     alt_array_t *esl, *hsl;
     alt_cross_t *ecross, *hcross;
@@ -464,11 +467,11 @@ alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk, double thick)
     alt_windredux(image);
     alt_unpack_color(fill, &fr, &fg, &fb, &fa);
     alt_unpack_color(strk, &sr, &sg, &sb, &sa);
-    hlwp = thick/2 + 0.5;
-    x0 = image->x0 - round(thick);
-    y0 = image->y0 - round(thick);
-    x1 = image->x1 + round(thick);
-    y1 = image->y1 + round(thick);
+    hlwp = image->diameter/2 + 0.5;
+    x0 = image->x0 - round(image->diameter);
+    y0 = image->y0 - round(image->diameter);
+    x1 = image->x1 + round(image->diameter);
+    y1 = image->y1 + round(image->diameter);
     i = y0;
     for (y = y0; y < y1; y++, i++) {
         esl = image->extr[i];
