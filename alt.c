@@ -497,6 +497,10 @@ alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk, double thick)
                 }
             }
         }
+        esl->count = hsl->count = 0;
+    }
+    for (x = 0; x < image->width; x++) {
+        image->vert[x]->count = 0;
     }
 }
 
