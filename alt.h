@@ -24,6 +24,12 @@ typedef struct {
     alt_endpt_t a, b, c;
 } alt_curve_t;
 
+/* Signed scanline intersection. */
+typedef struct {
+    double dist;    /* distance from scanline origin */
+    int sign;       /* 1 for off-on crossing, -1 for on-off */
+} alt_cross_t;
+
 #define ALT_INIT_BULK 7
 
 #define ALT_AT(A, I) ((A)->items + (I) * (A)->size)
@@ -46,12 +52,6 @@ typedef struct {
     uint8_t *data;      /* width*height pixels in format 0xRRGGBBAA */
 } alt_image_t;
 
-/* Signed scanline intersection. */
-typedef struct {
-    double dist;    /* distance from scanline origin */
-    int sign;       /* 1 for off-on crossing, -1 for on-off */
-} alt_cross_t;
-
 /* Affine transformation matrix. */
 /* | a c e |
  * | b d f |
@@ -60,6 +60,15 @@ typedef struct {
 typedef struct {
     double a, b, c, d, e, f;
 } alt_matrix_t;
+
+alt_array_t *alt_new_array(size_t item_size, unsigned int init_bulk);
+void alt_resize_array(alt_array_t *array, unsigned int min_bulk);
+void alt_push(alt_array_t *array, void *item);
+void alt_pop(alt_array_t *array, void *item);
+void alt_sort(alt_array_t *array, int (*comp)(const void *, const void *));
+void alt_del_array(alt_array_t **array);
+
+int alt_comp_cross(const void *a, const void *b);
 
 uint32_t alt_pack_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 void alt_unpack_color(uint32_t color, uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *a);
@@ -73,15 +82,6 @@ void alt_blend(alt_image_t *image, int x, int y,
                uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 void alt_save_pam(alt_image_t *image, char *fname);
 void alt_del_image(alt_image_t **image);
-
-alt_array_t *alt_new_array(size_t item_size, unsigned int init_bulk);
-void alt_resize_array(alt_array_t *array, unsigned int min_bulk);
-void alt_push(alt_array_t *array, void *item);
-void alt_pop(alt_array_t *array, void *item);
-void alt_sort(alt_array_t *array, int (*comp)(const void *, const void *));
-void alt_del_array(alt_array_t **array);
-
-int alt_comp_cross(const void *a, const void *b);
 
 void alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb, double range);
 void alt_scan_array(alt_image_t *image, alt_endpt_t *points, int count, double range);
