@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -32,6 +33,8 @@ alt_new_image(int width, int height)
     if (image == NULL) return NULL;
     image->width  = width;
     image->height = height;
+    image->x0 = image->y0 = INT_MAX;
+    image->x1 = image->y1 = INT_MIN;
     image->hori = (alt_array_t **) malloc(image->height * sizeof(alt_array_t *));
     image->vert = (alt_array_t **) malloc(image->width  * sizeof(alt_array_t *));
     image->extr = (alt_array_t **) malloc(image->height * sizeof(alt_array_t *));
@@ -269,6 +272,10 @@ alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb, double range)
     }
     vxa = round(vxa); vxb = round(vxb);
     hya = round(hya); hyb = round(hyb);
+    if (vxa < image->x0) image->x0 = vxa;
+    if (vxb > image->x1) image->x1 = vxb;
+    if (hya < image->y0) image->y0 = hya;
+    if (hyb > image->y1) image->y1 = hyb;
     /*  Add orthogonal intersections to extra scan. This is suboptimal for
      * diagonal segments, specially when fabs(slope) ~ 1.
      */
@@ -457,10 +464,10 @@ alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk, double thick)
     alt_unpack_color(fill, &fr, &fg, &fb, &fa);
     alt_unpack_color(strk, &sr, &sg, &sb, &sa);
     hlwp = thick/2 + 0.5;
-    x0 = 0;
-    y0 = 0;
-    x1 = image->width;
-    y1 = image->height;
+    x0 = image->x0 - round(thick);
+    y0 = image->y0 - round(thick);
+    x1 = image->x1 + round(thick);
+    y1 = image->y1 + round(thick);
     i = y0;
     for (y = y0; y < y1; y++, i++) {
         esl = image->extr[i];
@@ -502,6 +509,8 @@ alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk, double thick)
     for (x = 0; x < image->width; x++) {
         image->vert[x]->count = 0;
     }
+    image->x0 = image->y0 = INT_MAX;
+    image->x1 = image->y1 = INT_MIN;
 }
 
 /* Convert `curve` to polyline and add resulting points to array.

@@ -40,6 +40,7 @@ typedef struct {
 /* Raw 32-bit RGBA image. */
 typedef struct {
     int width, height;  /* image size in pixels */
+    int x0, y0, x1, y1; /* dirty region boundaries */
     /* Arrays of arrays of alt_cross_t. */
     alt_array_t **hori, **vert, **extr;
     uint8_t *data;      /* width*height pixels in format 0xRRGGBBAA */
