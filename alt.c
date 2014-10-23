@@ -461,6 +461,7 @@ alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk, double thick)
     uint8_t fr, fg, fb, fa;
     uint8_t sr, sg, sb, sa;
     int x0, y0, x1, y1, x, y, i;
+    alt_windredux(image);
     alt_unpack_color(fill, &fr, &fg, &fb, &fa);
     alt_unpack_color(strk, &sr, &sg, &sb, &sa);
     hlwp = thick/2 + 0.5;
