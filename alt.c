@@ -72,6 +72,29 @@ alt_del_array(alt_array_t **array)
     *array = NULL;
 }
 
+alt_array_t *
+alt_box_array(unsigned int item_count, size_t item_size, void *items)
+{
+    alt_array_t *array;
+    array = (alt_array_t *) malloc(sizeof(alt_array_t));
+    if (array == NULL) return NULL;
+    array->bulk = item_count;
+    array->count = item_count;
+    array->size = item_size;
+    array->items = items;
+    return array;
+}
+
+void *
+alt_unbox_array(alt_array_t **array)
+{
+    void *items;
+    items = (*array)->items;
+    free(*array);
+    *array = NULL;
+    return items;
+}
+
 /* Intersection comparison for qsort()-like interfaces. */
 int
 alt_comp_cross(const void *a, const void *b)

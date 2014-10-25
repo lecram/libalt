@@ -68,6 +68,8 @@ void alt_push(alt_array_t *array, void *item);
 void alt_pop(alt_array_t *array, void *item);
 void alt_sort(alt_array_t *array, int (*comp)(const void *, const void *));
 void alt_del_array(alt_array_t **array);
+alt_array_t *alt_box_array(unsigned int item_count, size_t item_size, void *items);
+void *alt_unbox_array(alt_array_t **array);
 
 int alt_comp_cross(const void *a, const void *b);
 
