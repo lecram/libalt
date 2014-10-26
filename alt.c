@@ -594,7 +594,7 @@ alt_add_curve(alt_array_t *endpts, alt_curve_t *curve)
  * next to each other, an on-curve point is implied halfway between them.
  * Return an array of alt_endpt_t. */
 alt_array_t *
-alt_unfold(alt_array_t *ctrpts)
+alt_unfold(alt_ctrpt_t *ctrpts, int count)
 {
     alt_ctrpt_t *s, *a, *b, m;
     alt_array_t *endpts;
@@ -602,16 +602,16 @@ alt_unfold(alt_array_t *ctrpts)
     int i;
     m.on = true;
     endpts = alt_new_array(sizeof(alt_endpt_t), ALT_INIT_BULK);
-    s = ALT_CAT(alt_ctrpt_t, ctrpts, 0);
-    b = ALT_CAT(alt_ctrpt_t, ctrpts, 1);
+    s = &ctrpts[0];
+    b = &ctrpts[1];
     alt_push(endpts, s);
     if (b->on) {
         alt_push(endpts, b);
         s = b;
     }
-    for (i = 2; i < (int) ctrpts->count; i++) {
+    for (i = 2; i < count; i++) {
         a = b;
-        b = ALT_CAT(alt_ctrpt_t, ctrpts, i);
+        b = &ctrpts[i];
         if (a->on) {
             if (b->on) {
                 alt_push(endpts, b);
@@ -640,34 +640,23 @@ alt_unfold(alt_array_t *ctrpts)
 }
 
 /* Create a bezigon that approximates a circle of center (x, y) and radius r. */
-alt_array_t *
+alt_ctrpt_t *
 alt_circle(double x, double y, double r)
 {
     double a;
-    alt_ctrpt_t ctrpt;
-    alt_array_t *ctrpts;
+    alt_ctrpt_t *ctrpts;
     a = r * (sqrt(2) - 1);
-    ctrpts = alt_new_array(sizeof(alt_ctrpt_t), 10);
-    ctrpt.x = x; ctrpt.y = y+r; ctrpt.on = true;
-    alt_push(ctrpts, &ctrpt);
-    ctrpt.x = x+a; ctrpt.y = y+r; ctrpt.on = false;
-    alt_push(ctrpts, &ctrpt);
-    ctrpt.x = x+r; ctrpt.y = y+a; ctrpt.on = false;
-    alt_push(ctrpts, &ctrpt);
-    ctrpt.x = x+r; ctrpt.y = y-a; ctrpt.on = false;
-    alt_push(ctrpts, &ctrpt);
-    ctrpt.x = x+a; ctrpt.y = y-r; ctrpt.on = false;
-    alt_push(ctrpts, &ctrpt);
-    ctrpt.x = x-a; ctrpt.y = y-r; ctrpt.on = false;
-    alt_push(ctrpts, &ctrpt);
-    ctrpt.x = x-r; ctrpt.y = y-a; ctrpt.on = false;
-    alt_push(ctrpts, &ctrpt);
-    ctrpt.x = x-r; ctrpt.y = y+a; ctrpt.on = false;
-    alt_push(ctrpts, &ctrpt);
-    ctrpt.x = x-a; ctrpt.y = y+r; ctrpt.on = false;
-    alt_push(ctrpts, &ctrpt);
-    ctrpt.x = x; ctrpt.y = y+r; ctrpt.on = true;
-    alt_push(ctrpts, &ctrpt);
+    ctrpts = (alt_ctrpt_t *) malloc(10 * sizeof(alt_ctrpt_t));
+    ctrpts[0].x = x  ; ctrpts[0].y = y+r; ctrpts[0].on = true;
+    ctrpts[1].x = x+a; ctrpts[1].y = y+r; ctrpts[1].on = false;
+    ctrpts[2].x = x+r; ctrpts[2].y = y+a; ctrpts[2].on = false;
+    ctrpts[3].x = x+r; ctrpts[3].y = y-a; ctrpts[3].on = false;
+    ctrpts[4].x = x+a; ctrpts[4].y = y-r; ctrpts[4].on = false;
+    ctrpts[5].x = x-a; ctrpts[5].y = y-r; ctrpts[5].on = false;
+    ctrpts[6].x = x-r; ctrpts[6].y = y-a; ctrpts[6].on = false;
+    ctrpts[7].x = x-r; ctrpts[7].y = y+a; ctrpts[7].on = false;
+    ctrpts[8].x = x-a; ctrpts[8].y = y+r; ctrpts[8].on = false;
+    ctrpts[9].x = x  ; ctrpts[9].y = y+r; ctrpts[9].on = true;
     return ctrpts;
 }
 
@@ -741,13 +730,13 @@ alt_add_translate(alt_matrix_t *mat, double x, double y)
 
 /* Apply affine transformation to all end points. */
 void
-alt_transform_endpts(alt_array_t *endpts, alt_matrix_t *mat)
+alt_transform_endpts(alt_endpt_t *endpts, int count, alt_matrix_t *mat)
 {
     alt_endpt_t *endpt;
     double x, y;
     int i;
-    for (i = 0; i < (int) endpts->count; i++) {
-        endpt = ALT_CAT(alt_endpt_t, endpts, i);
+    for (i = 0; i < count; i++) {
+        endpt = &endpts[i];
         x = mat->a*endpt->x + mat->c*endpt->y + mat->e;
         y = mat->b*endpt->x + mat->d*endpt->y + mat->f;
         endpt->x = x; endpt->y = y;
@@ -756,13 +745,13 @@ alt_transform_endpts(alt_array_t *endpts, alt_matrix_t *mat)
 
 /* Apply affine transformation to all control points. */
 void
-alt_transform_ctrpts(alt_array_t *ctrpts, alt_matrix_t *mat)
+alt_transform_ctrpts(alt_ctrpt_t *ctrpts, int count, alt_matrix_t *mat)
 {
     alt_ctrpt_t *ctrpt;
     double x, y;
     int i;
-    for (i = 0; i < (int) ctrpts->count; i++) {
-        ctrpt = ALT_CAT(alt_ctrpt_t, ctrpts, i);
+    for (i = 0; i < count; i++) {
+        ctrpt = &ctrpts[i];
         x = mat->a*ctrpt->x + mat->c*ctrpt->y + mat->e;
         y = mat->b*ctrpt->x + mat->d*ctrpt->y + mat->f;
         ctrpt->x = x; ctrpt->y = y;

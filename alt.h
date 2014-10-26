@@ -97,8 +97,8 @@ double alt_dist(alt_image_t *image, double x, double y, double r);
 void alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk);
 
 void alt_add_curve(alt_array_t *endpts, alt_curve_t *curve);
-alt_array_t *alt_unfold(alt_array_t *ctrpts);
-alt_array_t *alt_circle(double x, double y, double r);
+alt_array_t *alt_unfold(alt_ctrpt_t *ctrpts, int count);
+alt_ctrpt_t *alt_circle(double x, double y, double r);
 
 void alt_reset(alt_matrix_t *mat);
 void alt_add_custom(alt_matrix_t *mat, double a, double b,
@@ -109,7 +109,7 @@ void alt_add_hshear(alt_matrix_t *mat, double h);
 void alt_add_vshear(alt_matrix_t *mat, double v);
 void alt_add_rotate(alt_matrix_t *mat, double a);
 void alt_add_translate(alt_matrix_t *mat, double x, double y);
-void alt_transform_endpts(alt_array_t *endpts, alt_matrix_t *mat);
-void alt_transform_ctrpts(alt_array_t *ctrpts, alt_matrix_t *mat);
+void alt_transform_endpts(alt_endpt_t *endpts, int count, alt_matrix_t *mat);
+void alt_transform_ctrpts(alt_ctrpt_t *ctrpts, int count, alt_matrix_t *mat);
 
 #endif /* _ALT_H */
