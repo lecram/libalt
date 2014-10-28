@@ -308,8 +308,10 @@ alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb)
     /*  Add orthogonal intersections to extra scan. This is suboptimal for
      * diagonal segments, specially when fabs(slope) ~ 1.
      */
-    ex0 = floor(vxa-radius); ey0 = floor(hya-radius);
-    ex1 = ceil(vxb+radius)+1; ey1 = ceil(hyb+radius)+1;
+    ex0 = floor(vxa-radius);
+    ey0 = ALT_MAX(0, floor(hya-radius));
+    ex1 = ceil(vxb+radius)+1;
+    ey1 = ALT_MIN(image->height, ceil(hyb+radius)+1);
     cross.dist = ex0; cross.sign = +1;
     for (y = (int) ey0; y < (int) ey1; y++) {
         scanline = image->extr[y];
@@ -323,8 +325,10 @@ alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb)
     if (pa->y == pb->y) {
         /* Horizontal segment. */
         cross.dist = pa->y; cross.sign = hsign;
+        vxa = ALT_MAX(0, vxa);
+        vxb = ALT_MIN(image->width, vxb);
         while (vxa < vxb) {
-            scanline = image->vert[((int) vxa)];
+            scanline = image->vert[(int) vxa];
             alt_push(scanline, &cross);
             vxa++;
         }
@@ -332,8 +336,10 @@ alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb)
     else if (pa->x == pb->x) {
         /* Vertical segment. */
         cross.dist = pa->x; cross.sign = vsign;
+        hya = ALT_MAX(0, hya);
+        hyb = ALT_MIN(image->height, hyb);
         while (hya < hyb) {
-            scanline = image->hori[((int) hya)];
+            scanline = image->hori[(int) hya];
             alt_push(scanline, &cross);
             hya++;
         }
@@ -344,9 +350,11 @@ alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb)
         slope = (vxb-vxa) / (hyb-hya);
         cross.sign = hsign;
         while (vxa < vxb) {
-            scanline = image->vert[((int) vxa)];
-            cross.dist = vya;
-            alt_push(scanline, &cross);
+            if (0 <= (int) vxa && vxa < image->width) {
+                scanline = image->vert[(int) vxa];
+                cross.dist = vya;
+                alt_push(scanline, &cross);
+            }
             vya += sy / slope;
             vxa++;
         }
@@ -354,9 +362,11 @@ alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb)
         slope = 1 / slope;
         cross.sign = vsign;
         while (hya < hyb) {
-            scanline = image->hori[((int) hya)];
-            cross.dist = hxa;
-            alt_push(scanline, &cross);
+            if (0 <= (int) hya && hya < image->height) {
+                scanline = image->hori[(int) hya];
+                cross.dist = hxa;
+                alt_push(scanline, &cross);
+            }
             hxa += sx / slope;
             hya++;
         }
@@ -491,10 +501,10 @@ alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk)
     alt_unpack_color(fill, &fr, &fg, &fb, &fa);
     alt_unpack_color(strk, &sr, &sg, &sb, &sa);
     hlwp = image->diameter/2 + 0.5;
-    x0 = image->x0 - round(image->diameter);
-    y0 = image->y0 - round(image->diameter);
-    x1 = image->x1 + round(image->diameter);
-    y1 = image->y1 + round(image->diameter);
+    x0 = ALT_MAX(0, image->x0 - round(image->diameter));
+    y0 = ALT_MAX(0, image->y0 - round(image->diameter));
+    x1 = ALT_MIN(image->width, image->x1 + round(image->diameter));
+    y1 = ALT_MIN(image->height, image->y1 + round(image->diameter));
     i = y0;
     for (y = y0; y < y1; y++, i++) {
         esl = image->extr[i];
