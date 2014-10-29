@@ -166,6 +166,7 @@ alt_get_pixel(alt_image_t *image, int x, int y,
               uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *a)
 {
     int i;
+    y = image->height - y - 1;
     i = 4*(y*image->width+x);
     *r = image->data[i];
     *g = image->data[i+1];
@@ -179,6 +180,7 @@ alt_set_pixel(alt_image_t *image, int x, int y,
               uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
     int i;
+    y = image->height - y - 1;
     i = 4*(y*image->width+x);
     image->data[i]   = r;
     image->data[i+1] = g;
