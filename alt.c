@@ -498,7 +498,7 @@ alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk)
     double hlwp, d, m, aa;
     uint8_t fr, fg, fb, fa;
     uint8_t sr, sg, sb, sa;
-    int x0, y0, x1, y1, x, y, i;
+    int x0, y0, x1, y1, x, y;
     alt_windredux(image);
     alt_unpack_color(fill, &fr, &fg, &fb, &fa);
     alt_unpack_color(strk, &sr, &sg, &sb, &sa);
@@ -507,10 +507,9 @@ alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk)
     y0 = ALT_MAX(0, image->y0 - round(image->diameter));
     x1 = ALT_MIN(image->width, image->x1 + round(image->diameter));
     y1 = ALT_MIN(image->height, image->y1 + round(image->diameter));
-    i = y0;
-    for (y = y0; y < y1; y++, i++) {
-        esl = image->extr[i];
-        hsl = image->hori[i];
+    for (y = y0; y < y1; y++) {
+        esl = image->extr[y];
+        hsl = image->hori[y];
         border = inside = false;
         ecross = (alt_cross_t *) esl->items;
         hcross = (alt_cross_t *) hsl->items;
