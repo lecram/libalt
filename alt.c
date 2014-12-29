@@ -542,11 +542,11 @@ alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk)
                 }
             }
         }
-        esl->count = hsl->count = 0;
     }
-    for (x = 0; x < image->width; x++) {
+    for (y = 0; y < image->height; y++)
+        image->hori[y]->count = image->extr[y]->count = 0;
+    for (x = 0; x < image->width; x++)
         image->vert[x]->count = 0;
-    }
     image->x0 = image->y0 = INT_MAX;
     image->x1 = image->y1 = INT_MIN;
 }
