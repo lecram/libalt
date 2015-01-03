@@ -84,7 +84,7 @@ void alt_set_pixel(alt_image_t *image, int x, int y,
 void alt_clear(alt_image_t *image, uint32_t color);
 void alt_blend(alt_image_t *image, int x, int y,
                uint8_t r, uint8_t g, uint8_t b, uint8_t a);
-void alt_save_pam(alt_image_t *image, char *fname);
+void alt_save_pam(alt_image_t *image, const char *fname);
 void alt_del_image(alt_image_t **image);
 
 void alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb);

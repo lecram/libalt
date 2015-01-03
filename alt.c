@@ -229,7 +229,7 @@ alt_blend(alt_image_t *image, int x, int y,
 
 /* Save image as PAM file. */
 void
-alt_save_pam(alt_image_t *image, char *fname)
+alt_save_pam(alt_image_t *image, const char *fname)
 {
     FILE *pam = fopen(fname, "w");
     if (pam == NULL) return;
