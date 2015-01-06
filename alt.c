@@ -153,6 +153,34 @@ alt_new_image(int width, int height)
     return image;
 }
 
+/* Load image from PAM file. Return NULL on failure. */
+alt_image_t *
+alt_open_pam(const char *fname)
+{
+    char buf[16];
+    int depth, maxval;
+    alt_image_t *image;
+    int width = 0;
+    int height = 0;
+    FILE *pam = fopen(fname, "r");
+    if (pam == NULL) return NULL;
+    fscanf(pam, "%s\n", buf);
+    if (strcmp(buf, "P7")) return NULL;
+    fscanf(pam, "WIDTH %d\n", &width);
+    fscanf(pam, "HEIGHT %d\n", &height);
+    fscanf(pam, "DEPTH %d\n", &depth);
+    fscanf(pam, "MAXVAL %d\n", &maxval);
+    if (width == 0 || height == 0 || depth != 4 || maxval != 255) return NULL;
+    fscanf(pam, "TUPLTYPE %s\n", buf);
+    if (strcmp(buf, "RGB_ALPHA")) return NULL;
+    fscanf(pam, "%s\n", buf);
+    if (strcmp(buf, "ENDHDR")) return NULL;
+    image = alt_new_image(width, height);
+    fread(image->data, sizeof(uint32_t), image->width*image->height, pam);
+    fclose(pam);
+    return image;
+}
+
 /* Set pen diameter. */
 void
 alt_set_line_width(alt_image_t *image, double line_width)
