@@ -313,8 +313,7 @@ alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb)
     if (pa->x < pb->x) {
         hsign = +1;
         vxa = pa->x; vya = pa->y; vxb = pb->x; vyb = pb->y;
-    }
-    else {
+    } else {
         hsign = -1;
         vxa = pb->x; vya = pb->y; vxb = pa->x; vyb = pa->y;
     }
@@ -324,8 +323,7 @@ alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb)
     if (pa->y < pb->y) {
         vsign = +1;
         hxa = pa->x; hya = pa->y; hxb = pb->x; hyb = pb->y;
-    }
-    else {
+    } else {
         vsign = -1;
         hxa = pb->x; hya = pb->y; hxb = pa->x; hyb = pa->y;
     }
@@ -362,8 +360,7 @@ alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb)
             alt_push(scanline, &cross);
             vxa++;
         }
-    }
-    else if (pa->x == pb->x) {
+    } else if (pa->x == pb->x) {
         /* Vertical segment. */
         cross.dist = pa->x; cross.sign = vsign;
         hya = ALT_MAX(0, hya);
@@ -373,8 +370,7 @@ alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb)
             alt_push(scanline, &cross);
             hya++;
         }
-    }
-    else {
+    } else {
         /* Diagonal segment. */
         sy = vya < vyb ? +1 : -1;
         slope = (vxb-vxa) / (hyb-hya);
@@ -446,8 +442,7 @@ alt_windredux(alt_image_t *image)
                     if (pcross->dist == cross.dist) {
                         /* Duplicate crossings cancel each other. */
                         alt_pop(scanline, NULL);
-                    }
-                    else {
+                    } else {
                         cross.dist = pcross->dist;
                         alt_push(scanline, &cross);
                     }
@@ -564,8 +559,7 @@ alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk)
                         aa = ALT_MIN(aa, 1);
                         alt_blend(image, x, y, sr, sg, sb, lround(aa*sa));
                     }
-                }
-                else if (inside) {
+                } else if (inside) {
                     alt_blend(image, x, y, fr, fg, fb, fa);
                 }
             }
@@ -617,8 +611,7 @@ alt_add_curve(alt_array_t *endpts, alt_curve_t *curve)
             subcurve.b = d;
             subcurve.c = e;
             alt_push(stack, &subcurve);
-        }
-        else {
+        } else {
             /* Add point to polyline. */
             alt_push(endpts, &c);
         }
@@ -656,16 +649,14 @@ alt_unfold(alt_ctrpt_t *ctrpts, int count)
                 alt_push(endpts, b);
                 s = b;
             }
-        }
-        else {
+        } else {
             if (b->on) {
                 curve.a.x = s->x; curve.a.y = s->y;
                 curve.b.x = a->x; curve.b.y = a->y;
                 curve.c.x = b->x; curve.c.y = b->y;
                 alt_add_curve(endpts, &curve);
                 s = b;
-            }
-            else {
+            } else {
                 curve.a.x = s->x; curve.a.y = s->y;
                 curve.b.x = a->x; curve.b.y = a->y;
                 m.x = (a->x + b->x) / 2; m.y = (a->y + b->y) / 2;
