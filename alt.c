@@ -417,7 +417,7 @@ alt_scan_array(alt_image_t *image, alt_endpt_t *points, int count)
 }
 
 /* Sort intersections and reduce them according to the running winding number.
- * Only crossings that goes to or come from a zero winding number are kept.
+ * Only crossings that go to or come from a zero winding number are kept.
  */
 void
 alt_windredux(alt_image_t *image)
