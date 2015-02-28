@@ -181,11 +181,18 @@ alt_open_pam(const char *fname)
     return image;
 }
 
-/* Set pen diameter. */
-void
-alt_set_line_width(alt_image_t *image, double line_width)
+/* Set pen diameter (line width). */
+double
+alt_get_diameter(alt_image_t *image)
 {
-    image->diameter = line_width;
+    return image->diameter;
+}
+
+/* Set pen diameter (line width). */
+void
+alt_set_diameter(alt_image_t *image, double diameter)
+{
+    image->diameter = diameter;
 }
 
 /* Get pixel color at (x, y). */

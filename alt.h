@@ -77,7 +77,8 @@ uint32_t alt_pack_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 void alt_unpack_color(uint32_t color, uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *a);
 alt_image_t *alt_new_image(int width, int height);
 alt_image_t *alt_open_pam(const char *fname);
-void alt_set_line_width(alt_image_t *image, double line_width);
+double alt_get_diameter(alt_image_t *image);
+void alt_set_diameter(alt_image_t *image, double diameter);
 void alt_get_pixel(alt_image_t *image, int x, int y,
                    uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *a);
 void alt_set_pixel(alt_image_t *image, int x, int y,
