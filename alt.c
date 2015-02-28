@@ -551,7 +551,7 @@ alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk)
                 inside = !inside;
                 hcross++;
             }
-            if (x0 <= x && x < x1 && y0 <= y && y < y1) {
+            if (x0 <= x && x < x1) {
                 if (border) {
                     d = alt_dist(image, x, y, hlwp);
                     m = fabs(d);
