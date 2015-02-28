@@ -467,7 +467,7 @@ alt_windredux(alt_image_t *image)
  * Note that x here is a 1D coordinate that follows the scanline's direction.
  * This function is only used as a helper to alt_dist().
  */
-double
+static double
 alt_scanrange(alt_array_t *scanline, double x)
 {
     alt_cross_t *pcross;
@@ -479,9 +479,9 @@ alt_scanrange(alt_array_t *scanline, double x)
 /* Return the minimum distance between (x, y) and the path scanned into
  * `image`. If that path doesn't intersect the disk of radius `r` centered
  * at (x, y), then return `r`.
- * This function implements the L1L2 algorithm.
+ * This function implements the L1L2 algorithm and is a helper for alt_draw().
  */
-double
+static double
 alt_dist(alt_image_t *image, double x, double y, double r)
 {
     double mind, mag;

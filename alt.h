@@ -92,8 +92,8 @@ void alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb);
 void alt_scan_array(alt_image_t *image, alt_endpt_t *points, int count);
 void alt_windredux(alt_image_t *image);
 
-double alt_scanrange(alt_array_t *scanline, double x);
-double alt_dist(alt_image_t *image, double x, double y, double r);
+static double alt_scanrange(alt_array_t *scanline, double x);
+static double alt_dist(alt_image_t *image, double x, double y, double r);
 
 void alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk);
 
