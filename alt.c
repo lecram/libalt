@@ -7,11 +7,11 @@
 #include "alt.h"
 
 /* Create a new array. Return NULL if there is not enough memory. */
-alt_array_t *
+AltArray *
 alt_new_array(size_t item_size, unsigned int init_bulk)
 {
-    alt_array_t *array;
-    array = (alt_array_t *) malloc(sizeof(alt_array_t));
+    AltArray *array;
+    array = (AltArray *) malloc(sizeof(AltArray));
     if (array == NULL) return NULL;
     array->bulk = init_bulk ? init_bulk : ALT_INIT_BULK;
     array->count = 0;
@@ -23,7 +23,7 @@ alt_new_array(size_t item_size, unsigned int init_bulk)
 
 /* Resize the array to accomodate at least `min_bulk` items. */
 void
-alt_resize_array(alt_array_t *array, unsigned int min_bulk)
+alt_resize_array(AltArray *array, unsigned int min_bulk)
 {
     while (array->bulk > min_bulk)
         array->bulk >>= 1;
@@ -35,7 +35,7 @@ alt_resize_array(alt_array_t *array, unsigned int min_bulk)
 
 /* Add item to the end of `array`. */
 void
-alt_push(alt_array_t *array, void *item)
+alt_push(AltArray *array, void *item)
 {
     if (array->count == array->bulk)
         alt_resize_array(array, array->count + 1);
@@ -47,7 +47,7 @@ alt_push(alt_array_t *array, void *item)
  * The item removed is copied into `item`, if it's not null.
  */
 void
-alt_pop(alt_array_t *array, void *item)
+alt_pop(AltArray *array, void *item)
 {
     array->count--;
     if (item != NULL)
@@ -58,25 +58,25 @@ alt_pop(alt_array_t *array, void *item)
 
 /* Sort array according to `comp` (see stdlib's qsort()). */
 void
-alt_sort(alt_array_t *array, int (*comp)(const void *, const void *))
+alt_sort(AltArray *array, int (*comp)(const void *, const void *))
 {
     qsort(array->items, (size_t) array->count, array->size, comp);
 }
 
 /* Delete `array` and its content from memory. */
 void
-alt_del_array(alt_array_t **array)
+alt_del_array(AltArray **array)
 {
     free((*array)->items);
     free(*array);
     *array = NULL;
 }
 
-alt_array_t *
+AltArray *
 alt_box_array(unsigned int item_count, size_t item_size, void *items)
 {
-    alt_array_t *array;
-    array = (alt_array_t *) malloc(sizeof(alt_array_t));
+    AltArray *array;
+    array = (AltArray *) malloc(sizeof(AltArray));
     if (array == NULL) return NULL;
     array->bulk = item_count;
     array->count = item_count;
@@ -86,7 +86,7 @@ alt_box_array(unsigned int item_count, size_t item_size, void *items)
 }
 
 void *
-alt_unbox_array(alt_array_t **array)
+alt_unbox_array(AltArray **array)
 {
     void *items;
     items = (*array)->items;
@@ -99,8 +99,8 @@ alt_unbox_array(alt_array_t **array)
 int
 alt_comp_cross(const void *a, const void *b)
 {
-    const alt_cross_t *arg1 = a;
-    const alt_cross_t *arg2 = b;
+    const AltCross *arg1 = a;
+    const AltCross *arg2 = b;
     return arg1->dist - arg2->dist;
 }
 
@@ -122,30 +122,30 @@ alt_unpack_color(uint32_t color, uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *a)
 }
 
 /* Create a new image. Return NULL if there is not enough memory. */
-alt_image_t *
+AltImage *
 alt_new_image(int width, int height)
 {
-    alt_image_t *image;
+    AltImage *image;
     int i;
-    image = (alt_image_t *) malloc(sizeof(alt_image_t));
+    image = (AltImage *) malloc(sizeof(AltImage));
     if (image == NULL) return NULL;
     image->width  = width;
     image->height = height;
     image->x0 = image->y0 = INT_MAX;
     image->x1 = image->y1 = INT_MIN;
     image->diameter = 1;
-    image->hori = (alt_array_t **) malloc(image->height * sizeof(alt_array_t *));
-    image->vert = (alt_array_t **) malloc(image->width  * sizeof(alt_array_t *));
-    image->extr = (alt_array_t **) malloc(image->height * sizeof(alt_array_t *));
+    image->hori = (AltArray **) malloc(image->height * sizeof(AltArray *));
+    image->vert = (AltArray **) malloc(image->width  * sizeof(AltArray *));
+    image->extr = (AltArray **) malloc(image->height * sizeof(AltArray *));
     if (image->hori == NULL || image->vert == NULL || image->extr == NULL)
         return NULL;
     for (i = 0; i < image->width; i++) {
-        image->vert[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
+        image->vert[i] = alt_new_array(sizeof(AltCross), ALT_INIT_BULK);
         if (image->vert[i] == NULL) return NULL;
     }
     for (i = 0; i < image->height; i++) {
-        image->hori[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
-        image->extr[i] = alt_new_array(sizeof(alt_cross_t), ALT_INIT_BULK);
+        image->hori[i] = alt_new_array(sizeof(AltCross), ALT_INIT_BULK);
+        image->extr[i] = alt_new_array(sizeof(AltCross), ALT_INIT_BULK);
         if (image->hori[i] == NULL || image->extr[i] == NULL) return NULL;
     }
     image->data = (uint8_t *) calloc(4*width*height, sizeof(uint8_t));
@@ -154,12 +154,12 @@ alt_new_image(int width, int height)
 }
 
 /* Load image from PAM file. Return NULL on failure. */
-alt_image_t *
+AltImage *
 alt_open_pam(const char *fname)
 {
     char buf[16];
     int depth, maxval;
-    alt_image_t *image;
+    AltImage *image;
     int width = 0;
     int height = 0;
     FILE *pam = fopen(fname, "r");
@@ -183,21 +183,21 @@ alt_open_pam(const char *fname)
 
 /* Set pen diameter (line width). */
 double
-alt_get_diameter(alt_image_t *image)
+alt_get_diameter(AltImage *image)
 {
     return image->diameter;
 }
 
 /* Set pen diameter (line width). */
 void
-alt_set_diameter(alt_image_t *image, double diameter)
+alt_set_diameter(AltImage *image, double diameter)
 {
     image->diameter = diameter;
 }
 
 /* Get pixel color at (x, y). */
 void
-alt_get_pixel(alt_image_t *image, int x, int y,
+alt_get_pixel(AltImage *image, int x, int y,
               uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *a)
 {
     int i;
@@ -211,7 +211,7 @@ alt_get_pixel(alt_image_t *image, int x, int y,
 
 /* Set pixel color at (x, y). */
 void
-alt_set_pixel(alt_image_t *image, int x, int y,
+alt_set_pixel(AltImage *image, int x, int y,
               uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
     int i;
@@ -225,7 +225,7 @@ alt_set_pixel(alt_image_t *image, int x, int y,
 
 /* Fill the entire image with `color`. */
 void
-alt_clear(alt_image_t *image, uint32_t color)
+alt_clear(AltImage *image, uint32_t color)
 {
     int i;
     uint8_t r, g, b, a;
@@ -240,7 +240,7 @@ alt_clear(alt_image_t *image, uint32_t color)
 
 /* Alpha-blend pixel at (x, y) with (r, g, b, a). */
 void
-alt_blend(alt_image_t *image, int x, int y,
+alt_blend(AltImage *image, int x, int y,
           uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
     uint8_t r0, g0, b0, a0; /* background */
@@ -264,7 +264,7 @@ alt_blend(alt_image_t *image, int x, int y,
 
 /* Save image as PAM file. */
 void
-alt_save_pam(alt_image_t *image, const char *fname)
+alt_save_pam(AltImage *image, const char *fname)
 {
     FILE *pam = fopen(fname, "w");
     if (pam == NULL) return;
@@ -281,7 +281,7 @@ alt_save_pam(alt_image_t *image, const char *fname)
 
 /* Delete `image` and its content from memory. */
 void
-alt_del_image(alt_image_t **image)
+alt_del_image(AltImage **image)
 {
     int i;
     for (i = 0; i < (*image)->width; i++) {
@@ -301,10 +301,10 @@ alt_del_image(alt_image_t **image)
 
 /* Scan segment pa-pb and add intersections to `image`. */
 void
-alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb)
+alt_scan(AltImage *image, AltEndPt *pa, AltEndPt *pb)
 {
-    alt_array_t *scanline;
-    alt_cross_t cross;
+    AltArray *scanline;
+    AltCross cross;
     double radius;
     double hxa, hya, hxb, hyb;
     double vxa, vya, vxb, vyb;
@@ -408,10 +408,10 @@ alt_scan(alt_image_t *image, alt_endpt_t *pa, alt_endpt_t *pb)
 
 /* Scan `count` points at `points` and add intersections to `image`. */
 void
-alt_scan_array(alt_image_t *image, alt_endpt_t *points, int count)
+alt_scan_array(AltImage *image, AltEndPt *points, int count)
 {
     int i;
-    alt_endpt_t pa, pb;
+    AltEndPt pa, pb;
     for (i = 0; i < count-1; i++) {
         pa = points[i];
         pb = points[i+1];
@@ -423,10 +423,10 @@ alt_scan_array(alt_image_t *image, alt_endpt_t *points, int count)
  * Only crossings that go to or come from a zero winding number are kept.
  */
 void
-alt_windredux(alt_image_t *image)
+alt_windredux(AltImage *image)
 {
-    alt_array_t **scans[3], *scanline;
-    alt_cross_t cross, *pcross;
+    AltArray **scans[3], *scanline;
+    AltCross cross, *pcross;
     int count[3];
     int winda, windb;
     int i, j, k;
@@ -438,12 +438,12 @@ alt_windredux(alt_image_t *image)
     for (i = 0; i < 3; i++) {
         for (j = 0; j < count[i]; j++) {
             alt_sort(scans[i][j], alt_comp_cross);
-            scanline = alt_new_array(sizeof(alt_cross_t), scans[i][j]->count);
+            scanline = alt_new_array(sizeof(AltCross), scans[i][j]->count);
             cross.dist = -HUGE_VAL;
             alt_push(scanline, &cross);
             winda = windb = 0;
             for (k = 0; k < (int) scans[i][j]->count; k++) {
-                pcross = ALT_CAT(alt_cross_t, scans[i][j], k);
+                pcross = ALT_CAT(AltCross, scans[i][j], k);
                 windb += pcross->sign;
                 if (!winda || !windb) {
                     if (pcross->dist == cross.dist) {
@@ -470,10 +470,10 @@ alt_windredux(alt_image_t *image)
  * This function is only used as a helper to alt_dist().
  */
 static double
-alt_scanrange(alt_array_t *scanline, double x)
+alt_scanrange(AltArray *scanline, double x)
 {
-    alt_cross_t *pcross;
-    pcross = (alt_cross_t *) scanline->items;
+    AltCross *pcross;
+    pcross = (AltCross *) scanline->items;
     while ((++pcross)->dist <= x);
     return ALT_MIN(pcross->dist - x, x - (pcross-1)->dist);
 }
@@ -484,7 +484,7 @@ alt_scanrange(alt_array_t *scanline, double x)
  * This function implements the L1L2 algorithm and is a helper for alt_draw().
  */
 static double
-alt_dist(alt_image_t *image, double x, double y, double r)
+alt_dist(AltImage *image, double x, double y, double r)
 {
     double mind, mag;
     double j, d, d1, d2;
@@ -520,10 +520,10 @@ alt_dist(alt_image_t *image, double x, double y, double r)
  * `fill` is the fill color; `strk` is the stroke color.
  */
 void
-alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk)
+alt_draw(AltImage *image, uint32_t fill, uint32_t strk)
 {
-    alt_array_t *esl, *hsl;
-    alt_cross_t *ecross, *hcross;
+    AltArray *esl, *hsl;
+    AltCross *ecross, *hcross;
     bool border, inside;
     double hlwp, d, m, aa;
     uint8_t fr, fg, fb, fa;
@@ -541,8 +541,8 @@ alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk)
         esl = image->extr[y];
         hsl = image->hori[y];
         border = inside = false;
-        ecross = (alt_cross_t *) esl->items;
-        hcross = (alt_cross_t *) hsl->items;
+        ecross = (AltCross *) esl->items;
+        hcross = (AltCross *) hsl->items;
         ecross++; hcross++;
         for (x = 0; x < image->width; x++) {
             if (x >= ecross->dist) {
@@ -581,22 +581,22 @@ alt_draw(alt_image_t *image, uint32_t fill, uint32_t strk)
 }
 
 /* Convert `curve` to polyline and add resulting points to array.
- * `endpts` is an array of alt_endpt_t.
+ * `endpts` is an array of AltEndPt.
  */
 void
-alt_add_curve(alt_array_t *endpts, alt_curve_t *curve)
+alt_add_curve(AltArray *endpts, AltCurve *curve)
 {
     /*  We split a Bézier curve into two subcurves repeatedly until we reach
      * almost-straight curves that are then output as straight segments.
      *  Since the segments must be added in the correct order, we need to do
      * a depth-first search as we create a tree of subcurves.
      */
-    alt_array_t *stack;
-    alt_curve_t subcurve;
-    alt_endpt_t a, b, c;
-    alt_endpt_t d, e, f;
+    AltArray *stack;
+    AltCurve subcurve;
+    AltEndPt a, b, c;
+    AltEndPt d, e, f;
     double h;
-    stack = alt_new_array(sizeof(alt_curve_t), ALT_INIT_BULK);
+    stack = alt_new_array(sizeof(AltCurve), ALT_INIT_BULK);
     alt_push(stack, curve);
     while (stack->count) {
         alt_pop(stack, &subcurve);
@@ -627,20 +627,20 @@ alt_add_curve(alt_array_t *endpts, alt_curve_t *curve)
 }
 
 /* Convert a sequence of linked Bézier curves to a polyline.
- *  `ctrpts` is an array of alt_ctrpt_t. The boolean field `.on` indicates
+ *  `ctrpts` is an array of AltCtrPt. The boolean field `.on` indicates
  * whether a point is on-curve or off-curve. On-curve points are end points;
  * off-curve points are Bézier control points. If two off-curve points appear
  * next to each other, an on-curve point is implied halfway between them.
- * Return an array of alt_endpt_t. */
-alt_array_t *
-alt_unfold(alt_ctrpt_t *ctrpts, int count)
+ * Return an array of AltEndPt. */
+AltArray *
+alt_unfold(AltCtrPt *ctrpts, int count)
 {
-    alt_ctrpt_t *s, *a, *b, m;
-    alt_array_t *endpts;
-    alt_curve_t curve;
+    AltCtrPt *s, *a, *b, m;
+    AltArray *endpts;
+    AltCurve curve;
     int i;
     m.on = true;
-    endpts = alt_new_array(sizeof(alt_endpt_t), ALT_INIT_BULK);
+    endpts = alt_new_array(sizeof(AltEndPt), ALT_INIT_BULK);
     s = &ctrpts[0];
     b = &ctrpts[1];
     alt_push(endpts, s);
@@ -677,13 +677,13 @@ alt_unfold(alt_ctrpt_t *ctrpts, int count)
 }
 
 /* Create a bezigon that approximates a circle of center (x, y) and radius r. */
-alt_ctrpt_t *
+AltCtrPt *
 alt_circle(double x, double y, double r)
 {
     double a;
-    alt_ctrpt_t *ctrpts;
+    AltCtrPt *ctrpts;
     a = r * (sqrt(2) - 1);
-    ctrpts = (alt_ctrpt_t *) malloc(10 * sizeof(alt_ctrpt_t));
+    ctrpts = (AltCtrPt *) malloc(10 * sizeof(AltCtrPt));
     ctrpts[0].x = x  ; ctrpts[0].y = y+r; ctrpts[0].on = true;
     ctrpts[1].x = x+a; ctrpts[1].y = y+r; ctrpts[1].on = false;
     ctrpts[2].x = x+r; ctrpts[2].y = y+a; ctrpts[2].on = false;
@@ -699,7 +699,7 @@ alt_circle(double x, double y, double r)
 
 /* Reset matrix to identity map. */
 void
-alt_reset(alt_matrix_t *mat)
+alt_reset(AltMatrix *mat)
 {
     mat->a = 1; mat->c = 0; mat->e = 0;
     mat->b = 0; mat->d = 1; mat->f = 0;
@@ -707,7 +707,7 @@ alt_reset(alt_matrix_t *mat)
 
 /* Add a custom transformation to matrix. */
 void
-alt_add_custom(alt_matrix_t *mat, double a, double b,
+alt_add_custom(AltMatrix *mat, double a, double b,
                double c, double d, double e, double f)
 {
     double na, nb, nc, nd, ne, nf;
@@ -723,35 +723,35 @@ alt_add_custom(alt_matrix_t *mat, double a, double b,
 
 /* Add a squeeze transformation to matrix. */
 void
-alt_add_squeeze(alt_matrix_t *mat, double k)
+alt_add_squeeze(AltMatrix *mat, double k)
 {
     alt_add_custom(mat, k, 0, 0, 1/k, 0, 0);
 }
 
 /* Add a scale transformation to matrix. */
 void
-alt_add_scale(alt_matrix_t *mat, double x, double y)
+alt_add_scale(AltMatrix *mat, double x, double y)
 {
     alt_add_custom(mat, x, 0, 0, y, 0, 0);
 }
 
 /* Add a horizontal shear transformation to matrix. */
 void
-alt_add_hshear(alt_matrix_t *mat, double h)
+alt_add_hshear(AltMatrix *mat, double h)
 {
     alt_add_custom(mat, 1, 0, h, 1, 0, 0);
 }
 
 /* Add a vertical shear transformation to matrix. */
 void
-alt_add_vshear(alt_matrix_t *mat, double v)
+alt_add_vshear(AltMatrix *mat, double v)
 {
     alt_add_custom(mat, 1, v, 0, 1, 0, 0);
 }
 
 /* Add a rotation to matrix. `a` is the angle in radians. */
 void
-alt_add_rotate(alt_matrix_t *mat, double a)
+alt_add_rotate(AltMatrix *mat, double a)
 {
     double c, s;
     c = cos(a); s = sin(a);
@@ -760,16 +760,16 @@ alt_add_rotate(alt_matrix_t *mat, double a)
 
 /* Add a translation to matrix. */
 void
-alt_add_translate(alt_matrix_t *mat, double x, double y)
+alt_add_translate(AltMatrix *mat, double x, double y)
 {
     alt_add_custom(mat, 1, 0, 0, 1, x, y);
 }
 
 /* Apply affine transformation to all end points. */
 void
-alt_transform_endpts(alt_endpt_t *endpts, int count, alt_matrix_t *mat)
+alt_transform_endpts(AltEndPt *endpts, int count, AltMatrix *mat)
 {
-    alt_endpt_t *endpt;
+    AltEndPt *endpt;
     double x, y;
     int i;
     for (i = 0; i < count; i++) {
@@ -782,9 +782,9 @@ alt_transform_endpts(alt_endpt_t *endpts, int count, alt_matrix_t *mat)
 
 /* Apply affine transformation to all control points. */
 void
-alt_transform_ctrpts(alt_ctrpt_t *ctrpts, int count, alt_matrix_t *mat)
+alt_transform_ctrpts(AltCtrPt *ctrpts, int count, AltMatrix *mat)
 {
-    alt_ctrpt_t *ctrpt;
+    AltCtrPt *ctrpt;
     double x, y;
     int i;
     for (i = 0; i < count; i++) {
