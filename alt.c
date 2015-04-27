@@ -11,7 +11,7 @@ AltArray *
 alt_new_array(size_t item_size, unsigned int init_bulk)
 {
     AltArray *array;
-    array = (AltArray *) malloc(sizeof(AltArray));
+    array = malloc(sizeof(*array));
     if (array == NULL) return NULL;
     array->bulk = init_bulk ? init_bulk : ALT_INIT_BULK;
     array->count = 0;
@@ -76,7 +76,7 @@ AltArray *
 alt_box_array(unsigned int item_count, size_t item_size, void *items)
 {
     AltArray *array;
-    array = (AltArray *) malloc(sizeof(AltArray));
+    array = malloc(sizeof(*array));
     if (array == NULL) return NULL;
     array->bulk = item_count;
     array->count = item_count;
@@ -127,16 +127,16 @@ alt_new_image(int width, int height)
 {
     AltImage *image;
     int i;
-    image = (AltImage *) malloc(sizeof(AltImage));
+    image = malloc(sizeof(*image));
     if (image == NULL) return NULL;
     image->width  = width;
     image->height = height;
     image->x0 = image->y0 = INT_MAX;
     image->x1 = image->y1 = INT_MIN;
     image->diameter = 1;
-    image->hori = (AltArray **) malloc(image->height * sizeof(AltArray *));
-    image->vert = (AltArray **) malloc(image->width  * sizeof(AltArray *));
-    image->extr = (AltArray **) malloc(image->height * sizeof(AltArray *));
+    image->hori = malloc(image->height * sizeof(*image->hori));
+    image->vert = malloc(image->width  * sizeof(*image->vert));
+    image->extr = malloc(image->height * sizeof(*image->extr));
     if (image->hori == NULL || image->vert == NULL || image->extr == NULL)
         return NULL;
     for (i = 0; i < image->width; i++) {
@@ -148,7 +148,7 @@ alt_new_image(int width, int height)
         image->extr[i] = alt_new_array(sizeof(AltCross), ALT_INIT_BULK);
         if (image->hori[i] == NULL || image->extr[i] == NULL) return NULL;
     }
-    image->data = (uint8_t *) calloc(4*width*height, sizeof(uint8_t));
+    image->data = calloc(4*width*height, sizeof(*image->data));
     if (image->data == NULL) return NULL;
     return image;
 }
@@ -683,7 +683,7 @@ alt_circle(double x, double y, double r)
     double a;
     AltCtrPt *ctrpts;
     a = r * (sqrt(2) - 1);
-    ctrpts = (AltCtrPt *) malloc(10 * sizeof(AltCtrPt));
+    ctrpts = malloc(10 * sizeof(*ctrpts));
     ctrpts[0].x = x  ; ctrpts[0].y = y+r; ctrpts[0].on = true;
     ctrpts[1].x = x+a; ctrpts[1].y = y+r; ctrpts[1].on = false;
     ctrpts[2].x = x+r; ctrpts[2].y = y+a; ctrpts[2].on = false;
